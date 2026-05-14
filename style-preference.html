@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>设计风格偏好分析 · Outdoor Style Atlas</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --bg-card: #fffdf7;
+    --ink: #1f1d1a;
+    --ink-soft: #4a463f;
+    --ink-mute: #8a8479;
+    --ink-faint: #b8b3a6;
+    --line: #e4dfd0;
+    --line-soft: #ede8d8;
+    --hover: #f3efe3;
+    --accent: #6b5b3e;
+    --status-pending: #c19a2e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 64px 96px; }
+
+  .crumb { font-size: 13px; color: var(--ink-mute); letter-spacing: 0.04em; margin-bottom: 32px; }
+  .crumb a { color: var(--ink-soft); }
+  .crumb a:hover { color: var(--accent); }
+  .crumb .sep { margin: 0 8px; color: var(--ink-faint); }
+  .crumb .current { color: var(--ink); }
+
+  .hero { border-bottom: 1px solid var(--line); padding-bottom: 36px; margin-bottom: 40px; }
+  .hero .icon { font-size: 36px; margin-bottom: 14px; line-height: 1; }
+  .hero h1 { font-family: "Times New Roman", "Songti SC", serif; font-size: 40px; font-weight: 500; margin: 0 0 6px; letter-spacing: 0.01em; }
+  .hero .en { font-family: "Times New Roman", serif; font-style: italic; font-size: 17px; color: var(--ink-mute); letter-spacing: 0.04em; margin-bottom: 22px; }
+  .hero .lead { color: var(--ink-soft); font-size: 16px; max-width: 720px; }
+
+  .notice {
+    background: rgba(193,154,46,.08);
+    border: 1px solid rgba(193,154,46,.25);
+    border-radius: 4px;
+    padding: 18px 24px;
+    margin-bottom: 40px;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+  .notice b { color: var(--ink); font-weight: 600; }
+
+  /* Tabs */
+  .pref-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 0;
+    gap: 0;
+  }
+  .pref-tab {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 14px 24px 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink-mute);
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+    letter-spacing: 0.02em;
+    margin-bottom: -1px;
+    font-family: inherit;
+  }
+  .pref-tab:hover { color: var(--ink-soft); }
+  .pref-tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
+  .pref-tab .tab-en {
+    font-family: "Times New Roman", serif;
+    font-style: italic;
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin-left: 6px;
+    font-weight: 400;
+  }
+  .pref-tab.active .tab-en { color: var(--ink-mute); }
+
+  .pref-panel {
+    display: none;
+    padding: 36px 0 12px;
+  }
+  .pref-panel.active { display: block; }
+
+  .pref-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .pref-card .pref-icon { font-size: 28px; line-height: 1; }
+  .pref-card h3 {
+    margin: 0;
+    font-family: "Times New Roman", "Songti SC", serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .pref-card .pref-en {
+    font-family: "Times New Roman", serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-mute);
+    letter-spacing: 0.04em;
+    margin-top: -8px;
+  }
+  .pref-card p { color: var(--ink-soft); font-size: 14.5px; line-height: 1.75; margin: 0; }
+  .pref-card .pref-action {
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    background: var(--ink);
+    color: var(--bg-card);
+    border-radius: 2px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    transition: background .15s;
+    width: fit-content;
+  }
+  .pref-card .pref-action:hover { background: var(--ink-soft); }
+  .pref-card .pref-action.disabled {
+    background: transparent;
+    color: var(--ink-mute);
+    border: 1px solid var(--line);
+    pointer-events: none;
+  }
+  .pref-card .pref-meta {
+    display: flex;
+    gap: 18px;
+    color: var(--ink-mute);
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
+    padding-top: 4px;
+  }
+  .pref-card .pref-meta .pref-status {
+    color: var(--status-pending);
+  }
+
+  .section-title { display: flex; align-items: baseline; gap: 14px; margin: 40px 0 18px; }
+  .section-title .idx { font-family: "Times New Roman", serif; font-size: 12px; color: var(--ink-mute); letter-spacing: 0.18em; }
+  .section-title h2 { font-family: "Times New Roman", "Songti SC", serif; font-size: 22px; font-weight: 500; margin: 0; letter-spacing: 0.02em; }
+
+  .modules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .module {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 22px 24px;
+  }
+  .module h3 { margin: 0 0 8px; font-size: 16px; font-weight: 600; color: var(--ink); }
+  .module .module-en {
+    font-family: "Times New Roman", serif;
+    font-style: italic;
+    font-size: 12px;
+    color: var(--ink-mute);
+    letter-spacing: 0.04em;
+    margin-bottom: 12px;
+  }
+  .module p { color: var(--ink-soft); font-size: 13.5px; line-height: 1.7; margin: 0; }
+
+  .framework {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 28px 32px;
+  }
+  .framework ul {
+    margin: 0; padding-left: 18px;
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 2;
+    columns: 2; column-gap: 40px;
+  }
+  .framework li::marker { color: var(--ink-faint); }
+
+  .foot-nav {
+    margin-top: 64px; padding-top: 28px;
+    border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between;
+    color: var(--ink-mute); font-size: 13px;
+  }
+  .foot-nav a { color: var(--ink-soft); }
+  .foot-nav a:hover { color: var(--accent); }
+
+  @media (max-width: 880px) {
+    .wrap { padding: 32px 24px 64px; }
+    .hero h1 { font-size: 30px; }
+    .modules { grid-template-columns: 1fr; }
+    .framework ul { columns: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="crumb">
+    <a href="index.html">首页</a>
+    <span class="sep">/</span>
+    <span class="current">设计风格偏好分析</span>
+  </div>
+
+  <section class="hero">
+    <div class="icon">📊</div>
+    <h1>设计风格偏好分析</h1>
+    <div class="en">Preference Analysis</div>
+    <p class="lead">
+      综合<b>室内设计风格库</b>与<b>室外设计风格库</b>的浏览与标记数据,
+      生成个人审美画像。它回答的不是"<b>这个风格是什么</b>",而是"<b>你是谁、你偏向哪种生活方式</b>"——
+      是 6 库系统里<b>「从用户出发」</b>的入口。
+    </p>
+  </section>
+
+  <!-- Tab 切换 -->
+  <div class="pref-tabs">
+    <button class="pref-tab active" data-tab="indoor">
+      室内设计风格偏好分析<span class="tab-en">Indoor</span>
+    </button>
+    <button class="pref-tab" data-tab="outdoor">
+      室外设计风格偏好分析<span class="tab-en">Outdoor</span>
+    </button>
+    <button class="pref-tab" data-tab="overall">
+      综合偏好画像<span class="tab-en">Overall</span>
+    </button>
+  </div>
+
+  <!-- 室内 -->
+  <div class="pref-panel active" data-panel="indoor">
+    <div class="pref-card">
+      <div class="pref-icon">🛋</div>
+      <h3>室内设计风格偏好分析</h3>
+      <div class="pref-en">Indoor Style Preference</div>
+      <p>
+        基于<b>室内设计风格库</b>的浏览与标记数据,生成室内审美画像——
+        色彩调性、材料质感、空间气质、生活方式倾向等维度的综合分析。
+      </p>
+      <div class="pref-meta">
+        <span>分析维度 · 8 项</span>
+        <span class="pref-status">建设中</span>
+      </div>
+      <a class="pref-action disabled" href="#" data-pending-url="preference-indoor">
+        进入室内偏好分析 →
+      </a>
+    </div>
+  </div>
+
+  <!-- 室外 -->
+  <div class="pref-panel" data-panel="outdoor">
+    <div class="pref-card">
+      <div class="pref-icon">🏛</div>
+      <h3>室外设计风格偏好分析</h3>
+      <div class="pref-en">Outdoor Style Preference</div>
+      <p>
+        基于<b>室外设计风格库</b>的 50+ 风格标记数据(核心 / 偏好 / 借鉴 / 待定 / 排除),
+        分析庭院与花园审美倾向——东西方文化亲和度、自然性偏好、维护承受度等。
+      </p>
+      <div class="pref-meta">
+        <span>分析维度 · 8 项</span>
+        <span class="pref-status">建设中</span>
+      </div>
+      <a class="pref-action disabled" href="#" data-pending-url="preference-outdoor">
+        进入室外偏好分析 →
+      </a>
+    </div>
+  </div>
+
+  <!-- 综合 -->
+  <div class="pref-panel" data-panel="overall">
+    <div class="pref-card">
+      <div class="pref-icon">📊</div>
+      <h3>综合偏好画像</h3>
+      <div class="pref-en">Overall Persona</div>
+      <p>
+        交叉<b>室内 + 室外</b>偏好数据,生成完整的生活方式画像——
+        识别审美一致性与张力(例如室内极简却偏爱热带庭院),并基于画像推荐尚未浏览的风格。
+      </p>
+      <div class="pref-meta">
+        <span>分析维度 · 综合</span>
+        <span class="pref-status">建设中</span>
+      </div>
+      <a class="pref-action disabled" href="#" data-pending-url="preference-overall">
+        进入综合画像 →
+      </a>
+    </div>
+  </div>
+
+  <div class="section-title">
+    <span class="idx">— 01</span>
+    <h2>分析模块 / Modules</h2>
+  </div>
+
+  <div class="modules">
+    <div class="module">
+      <h3>风格倾向图</h3>
+      <div class="module-en">Style Tendency Map</div>
+      <p>把已标记的风格放到 <b>古典 ↔ 现代</b> × <b>东方 ↔ 西方</b> 的坐标系,可视化看出偏好聚集区。</p>
+    </div>
+    <div class="module">
+      <h3>色彩与材料偏好</h3>
+      <div class="module-en">Color & Material</div>
+      <p>从核心收藏中提取共同的色彩调性(暖/冷/低饱和)与材料倾向(木/石/金属/混凝土)。</p>
+    </div>
+    <div class="module">
+      <h3>维护承受度</h3>
+      <div class="module-en">Maintenance Capacity</div>
+      <p>已收藏风格的维护难度分布,提示是否在偏好与现实之间存在落差。</p>
+    </div>
+    <div class="module">
+      <h3>生活方式画像</h3>
+      <div class="module-en">Lifestyle Persona</div>
+      <p>结合室内 + 室外偏好,推断生活节奏(慢/快)、社交模式(独处/聚会)、文化亲和度(东方/西方)。</p>
+    </div>
+    <div class="module">
+      <h3>室内外一致性</h3>
+      <div class="module-en">Indoor-Outdoor Consistency</div>
+      <p>识别室内偏好与室外偏好之间的<b>冲突</b>(例如室内极简却收藏热带雨林庭院),帮助理解审美张力。</p>
+    </div>
+    <div class="module">
+      <h3>推荐与下一步</h3>
+      <div class="module-en">Recommendations</div>
+      <p>基于偏好画像,推荐尚未浏览但可能匹配的风格,并提示需要深入研究的维度。</p>
+    </div>
+  </div>
+
+  <div class="section-title">
+    <span class="idx">— 02</span>
+    <h2>分析框架 / Framework</h2>
+  </div>
+
+  <div class="framework">
+    <ul>
+      <li>🎨 色彩取向(暖 / 冷 / 低饱和 / 高饱和)</li>
+      <li>🏛 文化亲和度(东方 / 西方 / 混合)</li>
+      <li>🌿 自然性偏好(野趣 / 几何 / 中间)</li>
+      <li>📐 空间气质(开放 / 围合 / 留白)</li>
+      <li>🛠 维护承受度(低 / 中 / 高)</li>
+      <li>💰 投入预算区间偏好</li>
+      <li>🌤 气候适配真实度(原生 vs 强行套用)</li>
+      <li>🔗 室内室外一致性 / 冲突</li>
+    </ul>
+  </div>
+
+  <nav class="foot-nav">
+    <a href="index.html">← 返回首页</a>
+    <span>设计风格偏好分析 · OUTDOOR STYLE ATLAS</span>
+  </nav>
+
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.pref-tab');
+  const panels = document.querySelectorAll('.pref-panel');
+  tabs.forEach(t => {
+    t.addEventListener('click', () => {
+      const key = t.dataset.tab;
+      tabs.forEach(x => x.classList.toggle('active', x === t));
+      panels.forEach(p => p.classList.toggle('active', p.dataset.panel === key));
+    });
+  });
+</script>
+
+</body>
+</html>

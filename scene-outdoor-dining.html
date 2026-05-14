@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>户外用餐 Outdoor Dining · Outdoor Style Atlas</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --bg-card: #fffdf7;
+    --ink: #1f1d1a;
+    --ink-soft: #4a463f;
+    --ink-mute: #8a8479;
+    --ink-faint: #b8b3a6;
+    --line: #e4dfd0;
+    --line-soft: #ede8d8;
+    --line-strong: #1f1d1a;
+    --hover: #f3efe3;
+    --tag-bg: #ede8d6;
+    --tag-ink: #5a4f33;
+    --accent: #6b5b3e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); }
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Helvetica", "Arial", sans-serif; color: var(--ink); font-size: 15px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 64px 96px; }
+
+  .crumb { font-size: 13px; color: var(--ink-mute); letter-spacing: 0.04em; margin-bottom: 32px; }
+  .crumb a { color: var(--ink-soft); }
+  .crumb a:hover { color: var(--accent); }
+  .crumb .sep { margin: 0 8px; color: var(--ink-faint); }
+  .crumb .current { color: var(--ink); }
+
+  .hero { border-bottom: 1px solid var(--line); padding-bottom: 28px; margin-bottom: 36px; }
+  .hero .lib-tag { font-family: "Times New Roman", serif; font-size: 12px; color: var(--ink-mute); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 10px; }
+  .hero-title-row { display: grid; grid-template-columns: auto 1fr; gap: 36px; align-items: start; }
+  .hero-title-left h1 { font-family: "Times New Roman", "Songti SC", serif; font-size: 38px; font-weight: 500; margin: 0 0 4px; letter-spacing: 0.01em; }
+  .hero-title-left .en { font-family: "Times New Roman", serif; font-style: italic; font-size: 16px; color: var(--ink-mute); letter-spacing: 0.04em; }
+  .hero-title-right { padding-top: 8px; border-left: 1px solid var(--line); padding-left: 28px; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
+  .hero-title-right .one-liner { font-size: 15px; color: var(--ink-soft); margin: 0 0 14px; line-height: 1.7; }
+  .hero-title-right .badge-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge { font-size: 12px; padding: 4px 11px; border-radius: 2px; letter-spacing: 0.04em; background: var(--tag-bg); color: var(--tag-ink); }
+
+  .section-title { display: flex; align-items: baseline; gap: 14px; margin: 48px 0 18px; }
+  .section-title .idx { font-family: "Times New Roman", serif; font-size: 12px; color: var(--ink-mute); letter-spacing: 0.18em; }
+  .section-title h2 { font-family: "Times New Roman", "Songti SC", serif; font-size: 22px; font-weight: 500; margin: 0; letter-spacing: 0.02em; }
+  .section-title .hint { margin-left: auto; color: var(--ink-mute); font-size: 13px; }
+  .section-title h2 .emoji { margin-right: 10px; font-size: 18px; }
+
+  .block-card { background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 26px 32px; }
+  .sub { margin: 0 0 18px; }
+  .sub:last-child { margin-bottom: 0; }
+  .sub h4 { font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: 0.02em; margin: 0 0 8px; }
+  .sub ul { margin: 0; padding-left: 18px; color: var(--ink-soft); font-size: 14px; line-height: 1.85; }
+  .sub li::marker { color: var(--ink-faint); }
+  .sub li b { color: var(--ink); font-weight: 600; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-2 .block-card { padding: 22px 24px; }
+
+  .crosslink { background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 24px 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .crosslink .col h4 { font-size: 12px; color: var(--ink-mute); letter-spacing: 0.14em; text-transform: uppercase; margin: 0 0 10px; }
+  .crosslink .col ul { margin: 0; padding: 0; list-style: none; }
+  .crosslink .col li { padding: 5px 0; font-size: 14px; color: var(--ink-soft); }
+  .crosslink .col li a:hover { color: var(--accent); text-decoration: underline; text-decoration-color: var(--line); }
+
+  .foot-nav { margin-top: 64px; padding-top: 28px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; color: var(--ink-mute); font-size: 13px; }
+  .foot-nav a { color: var(--ink-soft); }
+  .foot-nav a:hover { color: var(--accent); }
+
+  @media (max-width: 880px) {
+    .wrap { padding: 32px 24px 64px; }
+    .hero-title-row { grid-template-columns: 1fr; gap: 16px; }
+    .hero-title-right { border-left: none; padding-left: 0; padding-top: 0; }
+    .hero-title-left h1 { font-size: 28px; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .crosslink { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="crumb">
+    <a href="index.html">首页</a>
+    <span class="sep">/</span>
+    <a href="library-scene.html">生活场景库</a>
+    <span class="sep">/</span>
+    <span class="current">户外用餐</span>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="lib-tag">🎭 SCENE LIBRARY · 餐饮休闲</div>
+    <div class="hero-title-row">
+      <div class="hero-title-left">
+        <h1>户外用餐</h1>
+        <div class="en">Outdoor Dining</div>
+      </div>
+      <div class="hero-title-right">
+        <p class="one-liner">
+          把"<b>吃饭</b>"从室内餐桌搬到户外阳光下——它不是"室内餐厅的延伸",而是<b>独立的生活方式</b>。地中海、托斯卡纳、英式乡村庭院的灵魂都来自这件事。
+        </p>
+        <div class="badge-row">
+          <span class="badge">家庭日常</span>
+          <span class="badge">社交</span>
+          <span class="badge">餐桌为核心</span>
+          <span class="badge">3 季使用</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 👥 使用人群 -->
+  <div class="section-title">
+    <span class="idx">— 01</span>
+    <h2><span class="emoji">👥</span>使用人群 / Users</h2>
+  </div>
+  <div class="block-card">
+    <div class="sub">
+      <h4>目标用户</h4>
+      <ul>
+        <li><b>家庭用户</b>:享受天伦之乐的日常晚餐</li>
+        <li><b>社交达人</b>:喜欢邀请朋友的聚会型家庭</li>
+        <li><b>美食爱好者</b>:享受烹饪与品尝过程</li>
+        <li><b>度假体验者</b>:追求度假感生活方式的家庭</li>
+      </ul>
+    </div>
+    <div class="sub">
+      <h4>人数与场景</h4>
+      <ul>
+        <li><b>小型聚餐</b>(2–6 人):日常家庭用餐</li>
+        <li><b>中型聚会</b>(6–12 人):周末家庭/朋友聚会</li>
+        <li><b>大型宴会</b>(12+ 人):节庆、生日、家庭派对</li>
+      </ul>
+    </div>
+    <div class="sub">
+      <h4>使用频率与时段</h4>
+      <ul>
+        <li>春夏秋三季为主,冬季仅暖地或暖光设备齐全时使用</li>
+        <li><b>晚餐</b>(18:00–22:00)是最典型场景:营造浪漫与放松氛围</li>
+        <li>周末早午餐与下午茶是补充场景</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 📐 空间需求 -->
+  <div class="section-title">
+    <span class="idx">— 02</span>
+    <h2><span class="emoji">📐</span>空间需求 / Spatial</h2>
+  </div>
+  <div class="grid-2">
+    <div class="block-card">
+      <div class="sub">
+        <h4>面积要求</h4>
+        <ul>
+          <li><b>小型</b>:10–20 ㎡(2–4 人)</li>
+          <li><b>中型</b>:20–40 ㎡(4–8 人)</li>
+          <li><b>大型</b>:40 ㎡+(8 人以上)</li>
+        </ul>
+      </div>
+      <div class="sub">
+        <h4>布局特点</h4>
+        <ul>
+          <li><b>开放式</b>:通透视野与空气流通</li>
+          <li><b>半封闭</b>:适度遮阳与隐私(藤架/凉棚)</li>
+          <li><b>多功能</b>:常与户外厨房结合</li>
+        </ul>
+      </div>
+    </div>
+    <div class="block-card">
+      <div class="sub">
+        <h4>关键设施</h4>
+        <ul>
+          <li><b>餐桌椅</b>:耐候 + 舒适的户外家具</li>
+          <li><b>遮阳设施</b>:阳伞、凉棚、葡萄藤架</li>
+          <li><b>照明设备</b>:暖色低位灯,营造晚间氛围</li>
+        </ul>
+      </div>
+      <div class="sub">
+        <h4>辅助空间</h4>
+        <ul>
+          <li><b>烹饪区</b>:户外厨房或与室内厨房无缝衔接</li>
+          <li><b>储物</b>:餐具、桌布的就近收纳</li>
+          <li><b>清洁</b>:洗手台或户外水槽</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🪑 家具配置 -->
+  <div class="section-title">
+    <span class="idx">— 03</span>
+    <h2><span class="emoji">🪑</span>家具配置 / Furniture</h2>
+  </div>
+  <div class="block-card">
+    <div class="sub">
+      <h4>主要家具</h4>
+      <ul>
+        <li><b>餐桌</b>:实木、铁艺、石面——耐候是首要标准</li>
+        <li><b>餐椅</b>:舒适且耐风雨,带可拆洗坐垫为佳</li>
+        <li><b>边桌或吧台</b>:摆放饮料与餐前小食</li>
+      </ul>
+    </div>
+    <div class="sub">
+      <h4>耐候性要求</h4>
+      <ul>
+        <li><b>防水</b>:抵抗雨水与湿气</li>
+        <li><b>防紫外线</b>:防止材质褪色变形</li>
+        <li><b>耐腐蚀</b>:海边项目需考虑盐雾防护</li>
+      </ul>
+    </div>
+    <div class="sub">
+      <h4>舒适度考虑</h4>
+      <ul>
+        <li>桌椅高度与角度的人体工程学</li>
+        <li>表面材质的触感(避免暴晒后烫手)</li>
+        <li>家具稳定性,防风固定设计</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 🎨 风格建议 -->
+  <div class="section-title">
+    <span class="idx">— 04</span>
+    <h2><span class="emoji">🎨</span>风格建议 / Style Match</h2>
+    <span class="hint">户外用餐是<b>地中海体系</b>的灵魂场景</span>
+  </div>
+  <div class="block-card">
+    <div class="sub">
+      <h4>最匹配的风格</h4>
+      <ul>
+        <li><b>地中海庭院</b>:户外用餐就是为它而生——长桌、葡萄藤架、橄榄树</li>
+        <li><b>托斯卡纳庭院</b>:葡萄藤架下的长午餐是经典画面</li>
+        <li><b>普罗旺斯花园</b>:薰衣草田边的家庭晚餐</li>
+        <li><b>英式乡村花园</b>:玫瑰花境旁的铸铁桌下午茶</li>
+      </ul>
+    </div>
+    <div class="sub">
+      <h4>较克制的风格</h4>
+      <ul>
+        <li><b>新中式 / 侘寂</b>:更适合"<b>茶席</b>"而非"<b>聚餐</b>"——尺度与气质都更小</li>
+        <li><b>现代极简 / 低调景观</b>:可做但需要精心设计,避免成为"<b>样板间式餐桌</b>"</li>
+      </ul>
+    </div>
+    <div class="sub">
+      <h4>氛围营造要点</h4>
+      <ul>
+        <li><b>暖光为主</b>:橙黄色 LED 灯串、蜡烛、火盆</li>
+        <li><b>植物围合</b>:用植物制造"<b>室外房间</b>"的感觉</li>
+        <li><b>声音背景</b>:水景、风铃、轻音乐</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 🌤️ 季节适应 -->
+  <div class="section-title">
+    <span class="idx">— 05</span>
+    <h2><span class="emoji">🌤️</span>季节适应 / Seasonal</h2>
+  </div>
+  <div class="grid-2">
+    <div class="block-card">
+      <div class="sub">
+        <h4>全年使用</h4>
+        <ul>
+          <li><b>春</b>:樱花/玫瑰盛开,户外晚餐复苏</li>
+          <li><b>夏</b>:凉风、葡萄藤遮阴,核心使用季</li>
+          <li><b>秋</b>:落叶诗意,晚餐+毯子组合</li>
+          <li><b>冬</b>:暖光+火盆+厚毯,仅适合温暖地区</li>
+        </ul>
+      </div>
+    </div>
+    <div class="block-card">
+      <div class="sub">
+        <h4>天气保护</h4>
+        <ul>
+          <li><b>雨水</b>:可移动雨棚或室内备用方案</li>
+          <li><b>风力</b>:防风固定设计,海边项目尤重要</li>
+          <li><b>极端天气</b>:必须有室内备用计划</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🛠️ 技术配置 -->
+  <div class="section-title">
+    <span class="idx">— 06</span>
+    <h2><span class="emoji">🛠️</span>技术配置 / Technical</h2>
+  </div>
+  <div class="grid-2">
+    <div class="block-card">
+      <div class="sub">
+        <h4>照明设计</h4>
+        <ul>
+          <li>LED 灯串与地灯的柔和氛围照明</li>
+          <li>烛台、灯笼、火盆的"<b>暖光仪式</b>"</li>
+          <li>调光控制——晚餐照明需要"<b>暖且暗</b>"</li>
+        </ul>
+      </div>
+      <div class="sub">
+        <h4>音响系统</h4>
+        <ul>
+          <li>户外防水音箱(避免干扰邻里)</li>
+          <li>蓝牙连接的便利性</li>
+          <li>背景音乐的音量克制</li>
+        </ul>
+      </div>
+    </div>
+    <div class="block-card">
+      <div class="sub">
+        <h4>遮阳设施</h4>
+        <ul>
+          <li><b>固定凉棚</b>:永久性遮阳,可承载藤本植物</li>
+          <li><b>移动阳伞</b>:灵活的午餐遮阳</li>
+          <li><b>智能遮阳</b>:可电动收放的阳光系统</li>
+        </ul>
+      </div>
+      <div class="sub">
+        <h4>智能控制</h4>
+        <ul>
+          <li>感应/定时照明</li>
+          <li>智能调温与加热设备</li>
+          <li>安防与用餐区监控</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🌿 植栽配合 -->
+  <div class="section-title">
+    <span class="idx">— 07</span>
+    <h2><span class="emoji">🌿</span>植栽配合 / Planting</h2>
+  </div>
+  <div class="block-card">
+    <div class="sub">
+      <h4>氛围植物</h4>
+      <ul>
+        <li><b>葡萄藤</b>:户外用餐"<b>顶棚</b>"的最佳选择(地中海/托斯卡纳)</li>
+        <li><b>紫藤、铁线莲</b>:浪漫遮阴的藤本</li>
+        <li><b>橄榄树</b>:单株作背景或景观焦点</li>
+      </ul>
+    </div>
+    <div class="sub">
+      <h4>香气与食用</h4>
+      <ul>
+        <li><b>食用香草</b>:迷迭香、薄荷、罗勒——"<b>边吃边摘</b>"的乐趣</li>
+        <li><b>芳香花卉</b>:薰衣草、茉莉、夜来香</li>
+        <li><b>柑橘类</b>:柠檬、柚子——既好看又好用</li>
+      </ul>
+    </div>
+    <div class="sub">
+      <h4>隐私屏障</h4>
+      <ul>
+        <li><b>绿篱</b>:黄杨、女贞——稳定的边界</li>
+        <li><b>高大乔木</b>:形成自然遮挡</li>
+        <li><b>攀爬植物</b>:藤架上的垂直绿化</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 🔗 跨库链接 -->
+  <div class="section-title">
+    <span class="idx">— 08</span>
+    <h2><span class="emoji">🔗</span>跨库链接 / Cross-Library</h2>
+    <span class="hint">从"户外用餐"出发的设计建议</span>
+  </div>
+  <div class="crosslink">
+    <div class="col">
+      <h4>🏛 推荐风格</h4>
+      <ul>
+        <li><a href="style-mediterranean.html">地中海庭院</a></li>
+        <li><a href="style-tuscan.html">托斯卡纳庭院</a></li>
+        <li><a href="style-provence.html">普罗旺斯花园</a></li>
+        <li><a href="style-english-cottage.html">英式乡村花园</a></li>
+      </ul>
+    </div>
+    <div class="col">
+      <h4>🏡 适合空间</h4>
+      <ul>
+        <li>露台(待补)</li>
+        <li>后院(待补)</li>
+        <li>葡萄藤架下(待补)</li>
+        <li>泳池边(待补)</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h4>🌿 植物专题</h4>
+      <ul>
+        <li>香草园(待补)</li>
+        <li>藤本花园(待补)</li>
+        <li>柑橘类(待补)</li>
+      </ul>
+    </div>
+  </div>
+
+  <nav class="foot-nav">
+    <a href="library-scene.html">← 返回 生活场景库</a>
+    <span>户外用餐 · OUTDOOR STYLE ATLAS</span>
+  </nav>
+
+</div>
+
+</body>
+</html>

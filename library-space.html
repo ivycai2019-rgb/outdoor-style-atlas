@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>空间类型库 · Outdoor Style Atlas</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --bg-card: #fffdf7;
+    --ink: #1f1d1a;
+    --ink-soft: #4a463f;
+    --ink-mute: #8a8479;
+    --ink-faint: #b8b3a6;
+    --line: #e4dfd0;
+    --line-soft: #ede8d8;
+    --line-strong: #1f1d1a;
+    --hover: #f3efe3;
+    --tag-bg: #ede8d6;
+    --tag-ink: #5a4f33;
+    --accent: #6b5b3e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 64px 96px; }
+
+  .crumb { font-size: 13px; color: var(--ink-mute); letter-spacing: 0.04em; margin-bottom: 32px; }
+  .crumb a { color: var(--ink-soft); }
+  .crumb a:hover { color: var(--accent); }
+  .crumb .sep { margin: 0 8px; color: var(--ink-faint); }
+  .crumb .current { color: var(--ink); }
+
+  .lib-hero {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 36px;
+    margin-bottom: 40px;
+  }
+  .lib-hero .icon { font-size: 36px; margin-bottom: 14px; line-height: 1; }
+  .lib-hero h1 {
+    font-family: "Times New Roman", "Songti SC", serif;
+    font-size: 40px; font-weight: 500;
+    margin: 0 0 6px; letter-spacing: 0.01em;
+  }
+  .lib-hero .en {
+    font-family: "Times New Roman", serif;
+    font-style: italic;
+    font-size: 17px; color: var(--ink-mute);
+    letter-spacing: 0.04em; margin-bottom: 22px;
+  }
+  .lib-hero .lead {
+    color: var(--ink-soft);
+    font-size: 16px; max-width: 720px;
+    margin-bottom: 8px;
+  }
+
+  .building-notice {
+    background: rgba(193,154,46,.08);
+    border: 1px solid rgba(193,154,46,.25);
+    border-radius: 4px;
+    padding: 18px 24px;
+    margin-bottom: 40px;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+  .building-notice b { color: var(--ink); font-weight: 600; }
+
+  .section-title {
+    display: flex; align-items: baseline; gap: 14px;
+    margin: 40px 0 18px;
+  }
+  .section-title .idx {
+    font-family: "Times New Roman", serif;
+    font-size: 12px; color: var(--ink-mute);
+    letter-spacing: 0.18em;
+  }
+  .section-title h2 {
+    font-family: "Times New Roman", "Songti SC", serif;
+    font-size: 22px; font-weight: 500; margin: 0;
+    letter-spacing: 0.02em;
+  }
+  .section-title .hint {
+    margin-left: auto; color: var(--ink-mute); font-size: 13px;
+  }
+
+  /* 分类卡片 */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .cat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 22px 24px;
+  }
+  .cat-card h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+  .cat-card ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 1.85;
+  }
+  .cat-card li {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 4px 0;
+  }
+  .cat-card li a {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    width: 100%;
+    transition: color .15s;
+  }
+  .cat-card li a:hover { color: var(--accent); }
+  .cat-card li a:hover .en { color: var(--accent); opacity: 0.8; }
+  .cat-card li.linked::before {
+    content: "→";
+    color: var(--accent);
+    font-family: "Times New Roman", serif;
+    font-size: 12px;
+  }
+  .cat-card li .en {
+    font-family: "Times New Roman", serif;
+    font-style: italic;
+    font-size: 12.5px;
+    color: var(--ink-mute);
+  }
+
+  /* 分析框架 */
+  .framework {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 28px 32px;
+  }
+  .framework ul {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 2;
+    columns: 2;
+    column-gap: 40px;
+  }
+  .framework li::marker { color: var(--ink-faint); }
+
+  .foot-nav {
+    margin-top: 64px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    color: var(--ink-mute);
+    font-size: 13px;
+  }
+  .foot-nav a { color: var(--ink-soft); }
+  .foot-nav a:hover { color: var(--accent); }
+
+  @media (max-width: 880px) {
+    .wrap { padding: 32px 24px 64px; }
+    .lib-hero h1 { font-size: 30px; }
+    .cat-grid { grid-template-columns: 1fr; }
+    .framework ul { columns: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="crumb">
+    <a href="index.html">首页</a>
+    <span class="sep">/</span>
+    <span class="current">空间类型库</span>
+  </div>
+
+  <section class="lib-hero">
+    <div class="icon">🏡</div>
+    <h1>空间类型库</h1>
+    <div class="en">Space Library</div>
+    <p class="lead">
+      按"<b>空间位置 + 功能</b>"组织的室外空间分类——前庭、后院、内院、露台、屋顶、泳池区等。
+      它回答的不是"<b>什么风格</b>",而是"<b>这块地适合做什么</b>"——是 4 库系统里"<b>从地形出发</b>"的入口。
+    </p>
+  </section>
+
+  <div class="building-notice">
+    <b>建设中</b>:本库目前已完成总体分类与分析框架。具体空间类型的详情页正在陆续补充——后续每个空间类型都会展开为独立页面,包含尺寸、隐私、风格适配、植栽策略等完整分析。
+  </div>
+
+  <!-- 01 空间分类总表 -->
+  <div class="section-title">
+    <span class="idx">— 01</span>
+    <h2>空间分类 / Categories</h2>
+    <span class="hint">点击进入空间详情页(陆续上线)</span>
+  </div>
+
+  <div class="cat-grid">
+
+    <div class="cat-card">
+      <h3>入口空间</h3>
+      <ul>
+        <li class="linked"><a href="space-front-garden.html">前庭 <span class="en">Front Garden</span></a></li>
+        <li>入口花园 <span class="en">Entry Garden</span></li>
+        <li>门廊庭院 <span class="en">Porch Garden</span></li>
+      </ul>
+    </div>
+
+    <div class="cat-card">
+      <h3>主体庭院</h3>
+      <ul>
+        <li>后院 <span class="en">Backyard</span></li>
+        <li>内院 <span class="en">Courtyard</span></li>
+        <li>中央庭院 <span class="en">Central Courtyard</span></li>
+      </ul>
+    </div>
+
+    <div class="cat-card">
+      <h3>休闲平台</h3>
+      <ul>
+        <li>露台 <span class="en">Terrace</span></li>
+        <li>阳台 <span class="en">Balcony</span></li>
+        <li>屋顶花园 <span class="en">Rooftop Garden</span></li>
+      </ul>
+    </div>
+
+    <div class="cat-card">
+      <h3>水景空间</h3>
+      <ul>
+        <li>泳池区 <span class="en">Pool Area</span></li>
+        <li>水边花园 <span class="en">Waterside Garden</span></li>
+        <li>下沉庭院 <span class="en">Sunken Garden</span></li>
+      </ul>
+    </div>
+
+    <div class="cat-card">
+      <h3>功能专区</h3>
+      <ul>
+        <li>户外厨房 <span class="en">Outdoor Kitchen</span></li>
+        <li>户外餐厅 <span class="en">Outdoor Dining</span></li>
+        <li>户外客厅 <span class="en">Outdoor Living Room</span></li>
+      </ul>
+    </div>
+
+    <div class="cat-card">
+      <h3>生态花园</h3>
+      <ul>
+        <li>菜园 <span class="en">Vegetable Garden</span></li>
+        <li>果树园 <span class="en">Orchard</span></li>
+        <li>生态湿地 <span class="en">Ecological Wetland</span></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- 02 分析框架 -->
+  <div class="section-title">
+    <span class="idx">— 02</span>
+    <h2>分析框架 / Framework</h2>
+    <span class="hint">每个空间页的标准研究维度</span>
+  </div>
+
+  <div class="framework">
+    <ul>
+      <li>📐 空间特点(尺寸 / 位置 / 隐私 / 朝向)</li>
+      <li>🎯 功能分区(主要用途 / 辅助 / 动线 / 家具)</li>
+      <li>🎨 风格适配(推荐风格 / 理由 / 色彩建议)</li>
+      <li>🌤️ 气候考虑(阳光 / 风向 / 雨水 / 季节)</li>
+      <li>🛠️ 建造要点(地面 / 围栏 / 照明 / 材料)</li>
+      <li>🌿 植栽策略(植物选择 / 种植位置 / 维护)</li>
+      <li>💰 成本评估(建造 / 维护 / 扩建 / 回报)</li>
+      <li>🔗 跨库链接(对应风格 / 适合场景 / 推荐植物)</li>
+    </ul>
+  </div>
+
+  <nav class="foot-nav">
+    <a href="index.html">← 返回首页</a>
+    <span>空间类型库 · OUTDOOR STYLE ATLAS</span>
+  </nav>
+
+</div>
+
+</body>
+</html>

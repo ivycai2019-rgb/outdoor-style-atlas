@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>风格对比 · Outdoor Style Atlas</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --bg-card: #fffdf7;
+    --ink: #1f1d1a;
+    --ink-soft: #4a463f;
+    --ink-mute: #8a8479;
+    --ink-faint: #b8b3a6;
+    --line: #e4dfd0;
+    --line-soft: #ede8d8;
+    --line-strong: #1f1d1a;
+    --hover: #f3efe3;
+    --accent: #6b5b3e;
+    --status-core: #a85a4a;
+    --status-favorite: #6b8e4e;
+    --status-reference: #5b7a8a;
+    --status-pending: #c19a2e;
+    --status-exclude: #8a8479;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  .wrap { max-width: 1380px; margin: 0 auto; padding: 48px 64px 96px; }
+
+  .crumb { font-size: 13px; color: var(--ink-mute); letter-spacing: 0.04em; margin-bottom: 24px; }
+  .crumb a { color: var(--ink-soft); }
+  .crumb a:hover { color: var(--accent); }
+  .crumb .sep { margin: 0 8px; color: var(--ink-faint); }
+  .crumb .current { color: var(--ink); }
+
+  .hero {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .hero h1 {
+    font-family: "Times New Roman", "Songti SC", serif;
+    font-size: 32px;
+    font-weight: 500;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  .hero .hero-en {
+    font-family: "Times New Roman", serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-mute);
+    letter-spacing: 0.04em;
+    margin-left: 12px;
+  }
+  .hero .back-btn {
+    font-size: 13px;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    padding: 8px 16px;
+    border-radius: 2px;
+    transition: background .15s, color .15s;
+  }
+  .hero .back-btn:hover { background: var(--hover); color: var(--ink); }
+
+  .empty-state {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 48px;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.8;
+  }
+  .empty-state b { color: var(--ink); }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--bg-card);
+  }
+  .ct {
+    display: grid;
+    min-width: max-content;
+  }
+  .ct-row {
+    display: grid;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .ct-row:last-child { border-bottom: none; }
+  .ct .cell {
+    padding: 14px 18px;
+    border-right: 1px solid var(--line-soft);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    vertical-align: top;
+  }
+  .ct .cell:last-child { border-right: none; }
+  .ct .cell b { color: var(--ink); font-weight: 600; }
+
+  /* 首列(行标题)粘性 */
+  .ct .row-label {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--hover);
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    border-right-color: var(--line);
+  }
+  .ct .row-label.recog-num {
+    font-family: "Times New Roman", serif;
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--ink-mute);
+    letter-spacing: 0.08em;
+  }
+
+  /* 表头 */
+  .ct-row.head .cell {
+    background: var(--hover);
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 16px 18px;
+  }
+  .ct-row.head .cell .head-en {
+    display: block;
+    font-family: "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 11.5px;
+    color: var(--ink-mute);
+    margin-top: 2px;
+  }
+  .ct-row.head .cell .head-mark {
+    display: inline-block;
+    font-size: 11px;
+    padding: 1px 7px;
+    margin-right: 8px;
+    border-radius: 2px;
+    vertical-align: 1px;
+  }
+  .ct-row.head .cell .head-mark.core      { color: var(--status-core);      background: rgba(168,90,74,.10); }
+  .ct-row.head .cell .head-mark.supplement{ color: var(--ink-mute);         background: rgba(138,132,121,.10); }
+  .ct-row.head .cell .head-mark.edge      { color: var(--ink-faint);        background: rgba(184,179,166,.18); }
+
+  /* 分段带 */
+  .ct-row.section-band .cell {
+    background: var(--ink);
+    color: var(--bg-card);
+    font-family: "Times New Roman", "Songti SC", serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    padding: 10px 18px;
+    border-right: none;
+    position: sticky;
+    left: 0;
+  }
+
+  @media (max-width: 880px) {
+    .wrap { padding: 32px 24px 64px; }
+    .hero h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="crumb">
+    <a href="index.html">首页</a>
+    <span class="sep">/</span>
+    <a id="backToSys" href="index.html">体系页</a>
+    <span class="sep">/</span>
+    <span class="current">风格对比</span>
+  </div>
+
+  <div class="hero">
+    <div>
+      <h1>风格对比<span class="hero-en">Style Comparison</span></h1>
+    </div>
+    <a class="back-btn" id="backBtn" href="index.html">← 返回</a>
+  </div>
+
+  <div id="content"></div>
+
+</div>
+
+<script>
+(function () {
+  const FEATURE_KEYS = ['空间结构', '动线 / 视线', '植物语言', '色彩系统', '材料系统'];
+  const MARK_LABEL = { '★': 'core', '◎': 'supplement', '△': 'edge' };
+  const SYS_LABEL = {
+    eastern: '东方庭院体系',
+    classical: '欧洲古典与庄园花园体系',
+    country: '欧洲乡村花园体系',
+    mediterranean: '地中海与南欧度假体系',
+    modern: '现代自然主义与极简体系',
+    tropical: '热带与亚热带度假体系',
+    industrial: '工业与都市景观体系',
+    farmhouse: '乡村农庄与生态花园体系',
+    desert: '干旱与沙漠景观体系',
+    american: '美式庭院体系',
+  };
+
+  const params = new URLSearchParams(location.search);
+  const sysKey = params.get('sys') || '';
+  const sysHref = sysKey ? `system-${sysKey}.html` : 'index.html';
+  const sysName = SYS_LABEL[sysKey] || '体系页';
+
+  document.getElementById('backToSys').href = sysHref;
+  document.getElementById('backToSys').textContent = sysName;
+  document.getElementById('backBtn').href = sysHref;
+  document.getElementById('backBtn').textContent = '← 返回 ' + sysName;
+
+  const contentEl = document.getElementById('content');
+
+  let payload = null;
+  try {
+    const raw = sessionStorage.getItem('compare:' + sysKey);
+    if (raw) payload = JSON.parse(raw);
+  } catch (e) {}
+
+  if (!payload || !Array.isArray(payload) || payload.length < 2) {
+    contentEl.innerHTML = `
+      <div class="empty-state">
+        <p>对比数据为空 — 请先返回 <a href="${sysHref}" style="color:var(--accent);">${sysName}</a>,
+        在风格卡片右上角勾选 <b>2-4 个风格</b>,然后点击底部「查看对比」。</p>
+      </div>
+    `;
+    return;
+  }
+
+  // 异步:对没有 detail 的风格,从 href 拉数据
+  async function ensureDetail(s) {
+    if (s.detail) return s.detail;
+    if (!s.href) return {};
+    try {
+      const html = await fetch(s.href).then(r => r.text());
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const data = {};
+      doc.querySelectorAll('.intro .kp').forEach(kp => {
+        const lab = (kp.querySelector('.kp-label') || {}).textContent || '';
+        const txt = (kp.querySelector('.kp-text') || {}).innerHTML || '';
+        if (lab.trim() === '核心气质') data['核心气质'] = txt.trim();
+      });
+      doc.querySelectorAll('.features .feat-row').forEach(r => {
+        const k = ((r.querySelector('.feat-key') || {}).textContent || '').trim();
+        if (!k) return;
+        const valEl = r.querySelector('.feat-val');
+        if (!valEl) return;
+        const plantLines = valEl.querySelectorAll('.plant-line');
+        if (plantLines.length > 0) {
+          const parts = Array.from(plantLines).map(pl => {
+            const lab = (pl.querySelector('b') || {}).textContent || '';
+            const span = (pl.querySelector('span') || {}).innerHTML || '';
+            return `<b>${lab}</b>:${span}`;
+          });
+          data[k] = parts.join('<br>');
+        } else {
+          data[k] = valEl.innerHTML.trim();
+        }
+      });
+      const recogs = doc.querySelectorAll('.recognize .recognize-text');
+      data['识别点列表'] = Array.from(recogs).map(r => r.innerHTML.trim());
+      return data;
+    } catch (err) {
+      return { error: '加载失败' };
+    }
+  }
+
+  async function render() {
+    contentEl.innerHTML = '<div class="empty-state">加载中…</div>';
+    const datas = await Promise.all(payload.map(ensureDetail));
+
+    const n = payload.length;
+    const colTpl = `160px repeat(${n}, minmax(220px, 1fr))`;
+
+    let html = '<div class="table-wrap"><div class="ct">';
+
+    // 表头
+    html += `<div class="ct-row head" style="grid-template-columns:${colTpl}">`;
+    html += '<div class="cell"></div>';
+    payload.forEach(s => {
+      const mc = MARK_LABEL[s.mark] || 'edge';
+      html += `<div class="cell">
+        <span class="head-mark ${mc}">${s.mark || ''}</span>${s.cn}
+        <span class="head-en">${s.en || ''}</span>
+      </div>`;
+    });
+    html += '</div>';
+
+    // 核心气质
+    if (datas.some(d => d['核心气质'])) {
+      html += `<div class="ct-row" style="grid-template-columns:${colTpl}">`;
+      html += '<div class="cell row-label">核心气质</div>';
+      datas.forEach(d => html += `<div class="cell">${d['核心气质'] || '—'}</div>`);
+      html += '</div>';
+    }
+
+    // — 风格识别点 段带
+    html += `<div class="ct-row section-band" style="grid-template-columns:1fr">`;
+    html += '<div class="cell">— 风格识别点 / How to Recognize</div>';
+    html += '</div>';
+    const maxRecogs = Math.max(...datas.map(d => (d['识别点列表'] || []).length), 0);
+    for (let r = 0; r < maxRecogs; r++) {
+      html += `<div class="ct-row" style="grid-template-columns:${colTpl}">`;
+      html += `<div class="cell row-label recog-num">${String(r + 1).padStart(2, '0')}</div>`;
+      datas.forEach(d => {
+        const list = d['识别点列表'] || [];
+        html += `<div class="cell">${list[r] || '—'}</div>`;
+      });
+      html += '</div>';
+    }
+
+    // — 核心特征 段带
+    html += `<div class="ct-row section-band" style="grid-template-columns:1fr">`;
+    html += '<div class="cell">— 核心特征 / Core Features</div>';
+    html += '</div>';
+    FEATURE_KEYS.forEach(key => {
+      if (datas.every(d => !d[key])) return;
+      html += `<div class="ct-row" style="grid-template-columns:${colTpl}">`;
+      html += `<div class="cell row-label">${key}</div>`;
+      datas.forEach(d => {
+        let v = d[key] || '—';
+        if (typeof v === 'string' && v.length > 320) v = v.slice(0, 320) + '…';
+        html += `<div class="cell">${v}</div>`;
+      });
+      html += '</div>';
+    });
+
+    html += '</div></div>';
+    contentEl.innerHTML = html;
+  }
+
+  render();
+})();
+</script>
+
+</body>
+</html>

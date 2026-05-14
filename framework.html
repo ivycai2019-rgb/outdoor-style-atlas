@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>风格判断框架 · Outdoor Style Atlas</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --bg-card: #fffdf7;
+    --ink: #1f1d1a;
+    --ink-soft: #4a463f;
+    --ink-mute: #8a8479;
+    --ink-faint: #b8b3a6;
+    --line: #e4dfd0;
+    --line-soft: #ede8d8;
+    --line-strong: #1f1d1a;
+    --hover: #f3efe3;
+    --tag-bg: #ede8d6;
+    --tag-ink: #5a4f33;
+    --accent: #6b5b3e;
+    --accent-soft: #c4b48a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 64px 96px; }
+
+  /* 面包屑 */
+  .crumb {
+    font-size: 13px;
+    color: var(--ink-mute);
+    margin-bottom: 32px;
+    letter-spacing: 0.04em;
+  }
+  .crumb a { color: var(--ink-soft); }
+  .crumb a:hover { color: var(--accent); }
+  .crumb .sep { margin: 0 8px; color: var(--ink-faint); }
+  .crumb .current { color: var(--ink); }
+
+  /* Hero */
+  .hero {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 36px;
+    margin-bottom: 40px;
+  }
+  .hero .tag {
+    font-family: "Times New Roman", serif;
+    font-size: 12px;
+    color: var(--ink-mute);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .hero h1 {
+    font-family: "Times New Roman", "Songti SC", serif;
+    font-size: 42px;
+    font-weight: 500;
+    margin: 0 0 6px;
+    letter-spacing: 0.01em;
+  }
+  .hero .en {
+    font-family: "Times New Roman", serif;
+    font-style: italic;
+    font-size: 17px;
+    color: var(--ink-mute);
+    letter-spacing: 0.04em;
+    margin-bottom: 20px;
+  }
+  .hero .lead {
+    color: var(--ink-soft);
+    font-size: 16px;
+    max-width: 720px;
+  }
+
+  /* TOC */
+  .toc {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .toc a {
+    padding: 14px 18px;
+    border-right: 1px solid var(--line-soft);
+    font-size: 13px;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    transition: background .15s;
+  }
+  .toc a:nth-child(3n) { border-right: none; }
+  .toc a:nth-child(n+4) { border-top: 1px solid var(--line-soft); }
+  .toc a:hover { background: var(--hover); color: var(--accent); }
+  .toc a .no {
+    font-family: "Times New Roman", serif;
+    color: var(--ink-mute);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    min-width: 24px;
+  }
+
+  /* 区块标题 */
+  .section-title {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin: 56px 0 18px;
+    padding-top: 20px;
+  }
+  .section-title .idx {
+    font-family: "Times New Roman", serif;
+    font-size: 12px;
+    color: var(--ink-mute);
+    letter-spacing: 0.18em;
+  }
+  .section-title h2 {
+    font-family: "Times New Roman", "Songti SC", serif;
+    font-size: 24px;
+    font-weight: 500;
+    margin: 0;
+  }
+  .section-title .hint {
+    margin-left: auto;
+    color: var(--ink-mute);
+    font-size: 13px;
+  }
+  .section-lead {
+    color: var(--ink-soft);
+    font-size: 14.5px;
+    margin: 0 0 22px;
+    max-width: 760px;
+  }
+
+  /* 通用卡片 */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 28px 32px;
+  }
+
+  /* ============ 1. 坐标轴 ============ */
+  .axis-block { margin-bottom: 24px; }
+  .axis-block:last-child { margin-bottom: 0; }
+  .axis-block h3 {
+    font-size: 15px;
+    margin: 0 0 6px;
+    font-weight: 600;
+  }
+  .axis-block .sub {
+    color: var(--ink-mute);
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  .axis-scale {
+    position: relative;
+    height: 70px;
+    margin-bottom: 14px;
+  }
+  .axis-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--line-strong);
+  }
+  .axis-line::before,
+  .axis-line::after {
+    content: "";
+    position: absolute;
+    top: -4px;
+    width: 8px; height: 8px;
+    background: var(--ink);
+    transform: rotate(45deg);
+  }
+  .axis-line::before { left: 0; }
+  .axis-line::after { right: 0; }
+  .axis-end {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    background: var(--bg-card);
+    padding: 0 14px;
+  }
+  .axis-end.left { left: 0; padding-left: 24px; }
+  .axis-end.right { right: 0; padding-right: 24px; }
+  .axis-marks {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 100px;
+    pointer-events: none;
+  }
+  .axis-mark {
+    position: relative;
+    text-align: center;
+    color: var(--ink-mute);
+    font-size: 11.5px;
+    letter-spacing: 0.02em;
+  }
+  .axis-mark::before {
+    content: "";
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px; height: 5px;
+    background: var(--accent-soft);
+    border-radius: 50%;
+  }
+  .axis-mark .line2 { display: block; }
+  .axis-rule {
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .axis-rule b { color: var(--ink); font-weight: 600; }
+
+  /* 四象限 */
+  .quadrant {
+    margin-top: 24px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .quad-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .quad-cell {
+    padding: 22px 24px;
+    border-bottom: 1px solid var(--line-soft);
+    background: var(--bg-card);
+  }
+  .quad-cell:nth-child(1), .quad-cell:nth-child(2) { border-bottom: 1px solid var(--line); }
+  .quad-cell:nth-child(odd) { border-right: 1px solid var(--line-soft); }
+  .quad-cell:nth-child(3), .quad-cell:nth-child(4) { border-bottom: none; }
+  .quad-label {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .quad-title {
+    font-size: 15px;
+    color: var(--ink);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .quad-styles {
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 8px;
+  }
+  .quad-mood {
+    font-size: 12px;
+    color: var(--ink-mute);
+    letter-spacing: 0.04em;
+  }
+
+  .axis-note {
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: rgba(237,232,216,.4);
+    border-left: 3px solid var(--accent);
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    line-height: 1.7;
+  }
+  .axis-note b { color: var(--ink); font-weight: 600; }
+
+  /* ============ 2. DNA 表 ============ */
+  .dna-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .dna-table th, .dna-table td {
+    padding: 14px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 14px;
+  }
+  .dna-table thead {
+    background: rgba(237,232,216,.32);
+  }
+  .dna-table th {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--ink-mute);
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+  .dna-table tr:last-child td { border-bottom: none; }
+  .dna-table .var-name {
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .dna-table .var-scale {
+    color: var(--ink-soft);
+    font-family: "Times New Roman", serif;
+    font-size: 13px;
+  }
+  .dna-table .var-scale .arrow { color: var(--accent); margin: 0 4px; }
+  .dna-table .var-meaning {
+    color: var(--ink-soft);
+    font-size: 13.5px;
+  }
+
+  .dna-example {
+    margin-top: 20px;
+    padding: 22px 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+  .dna-example .e-title {
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .dna-example ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    line-height: 1.85;
+  }
+  .dna-example li {
+    padding-left: 18px;
+    position: relative;
+  }
+  .dna-example li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-family: "Times New Roman", serif;
+  }
+  .dna-example b { color: var(--ink); font-weight: 600; }
+
+  /* ============ 3. 5 组配对 ============ */
+  .pair-list { display: flex; flex-direction: column; gap: 14px; }
+  .pair-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 22px 26px;
+  }
+  .pair-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--line-soft);
+  }
+  .pair-no {
+    font-family: "Times New Roman", serif;
+    color: var(--ink-mute);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+  }
+  .pair-title {
+    font-size: 15.5px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .pair-title .vs {
+    color: var(--ink-mute);
+    margin: 0 8px;
+    font-weight: 400;
+    font-family: "Times New Roman", serif;
+  }
+  .pair-rows {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 8px 18px;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+  }
+  .pair-rows .k {
+    color: var(--ink-mute);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding-top: 2px;
+  }
+  .pair-rows .v b { color: var(--ink); font-weight: 600; }
+
+  /* ============ 4. 4 步漏斗 ============ */
+  .funnel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .step {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 22px 26px;
+  }
+  .step-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+  .step-no {
+    font-family: "Times New Roman", serif;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    font-weight: 500;
+  }
+  .step-title {
+    font-size: 16px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .step-aim {
+    margin-left: auto;
+    color: var(--ink-mute);
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
+  }
+  .step-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  .step-table th, .step-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px dashed var(--line-soft);
+    vertical-align: top;
+  }
+  .step-table thead th {
+    color: var(--ink-mute);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+  .step-table td:first-child {
+    color: var(--ink);
+    font-weight: 600;
+    white-space: nowrap;
+    width: 130px;
+  }
+  .step-table td { color: var(--ink-soft); }
+  .step-table tr:last-child td { border-bottom: none; }
+  .step-quote {
+    margin-top: 14px;
+    color: var(--ink-mute);
+    font-size: 12.5px;
+    line-height: 1.65;
+    font-style: italic;
+    padding-left: 14px;
+    border-left: 2px solid var(--line);
+  }
+
+  /* ============ 5. 应用方式 ============ */
+  .use-list {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 8px 0;
+  }
+  .use-row {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 16px;
+    padding: 14px 26px;
+    border-bottom: 1px dashed var(--line-soft);
+    font-size: 14px;
+  }
+  .use-row:last-child { border-bottom: none; }
+  .use-no {
+    font-family: "Times New Roman", serif;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+  }
+  .use-text { color: var(--ink-soft); line-height: 1.7; }
+  .use-text b { color: var(--ink); font-weight: 600; }
+
+  /* ============ 6. 待补 ============ */
+  .todo-list {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 22px 28px;
+  }
+  .todo-row {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 8px 0;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .todo-row .box {
+    width: 14px; height: 14px;
+    border: 1px solid var(--ink-mute);
+    border-radius: 2px;
+    flex-shrink: 0;
+    transform: translateY(2px);
+  }
+
+  /* 底部 */
+  .foot-nav {
+    margin-top: 64px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    color: var(--ink-mute);
+    font-size: 13px;
+  }
+  .foot-nav a { color: var(--ink-soft); }
+  .foot-nav a:hover { color: var(--accent); }
+
+  @media (max-width: 880px) {
+    .wrap { padding: 32px 24px 64px; }
+    .hero h1 { font-size: 30px; }
+    .toc { grid-template-columns: 1fr; }
+    .toc a { border-right: none; border-top: 1px solid var(--line-soft); }
+    .toc a:first-child { border-top: none; }
+    .quad-grid { grid-template-columns: 1fr; }
+    .quad-cell:nth-child(odd) { border-right: none; }
+    .axis-marks { padding: 0 70px; font-size: 10px; }
+    .pair-rows { grid-template-columns: 1fr; gap: 2px; }
+    .pair-rows .k { padding-top: 8px; }
+    .step-table td:first-child { width: 90px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- 面包屑 -->
+  <div class="crumb">
+    <a href="index.html">首页</a>
+    <span class="sep">/</span>
+    <span class="current">风格判断框架</span>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="tag">FRAMEWORK · 07</div>
+    <h1>风格判断框架</h1>
+    <div class="en">Style Judgement Framework</div>
+    <p class="lead">
+      本页是 10 大体系之上的<b>判断层</b>——用于在阅读、对比、选择风格时提供统一的坐标系。
+      与<a href="index.html">总表</a>配合使用:总表回答"有哪些风格",本页回答"如何归属、对比、选择"。
+    </p>
+  </section>
+
+  <!-- 目录 -->
+  <nav class="toc">
+    <a href="#axis"><span class="no">01</span><span>两根坐标轴</span></a>
+    <a href="#dna"><span class="no">02</span><span>5 个隐变量 · 风格 DNA</span></a>
+    <a href="#pair"><span class="no">03</span><span>10 体系的 5 组隐藏配对</span></a>
+    <a href="#funnel"><span class="no">04</span><span>风格选择漏斗 · 4 步做减法</span></a>
+    <a href="#use"><span class="no">05</span><span>应用方式</span></a>
+    <a href="#todo"><span class="no">06</span><span>待补条目</span></a>
+  </nav>
+
+  <!-- ============ 01 坐标轴 ============ -->
+  <div class="section-title" id="axis">
+    <span class="idx">— 01</span>
+    <h2>两根坐标轴</h2>
+    <span class="hint">比"地域分类"更接近风格本质</span>
+  </div>
+  <p class="section-lead">
+    所有室外风格都可以用两根坐标轴定位。这套坐标用于<b>相关风格联想</b>与<b>跨体系对比</b>——同象限的风格更容易混搭,跨象限混搭通常失败。
+  </p>
+
+  <div class="card">
+
+    <!-- 轴 A -->
+    <div class="axis-block">
+      <h3>坐标轴 A · 自然 ↔ 人工(空间秩序)</h3>
+      <div class="sub">越向左,几何与修剪越强;越向右,自由生长与生态循环越多。</div>
+      <div class="axis-scale">
+        <div class="axis-line"></div>
+        <div class="axis-end left">强人工秩序</div>
+        <div class="axis-end right">强自然野趣</div>
+        <div class="axis-marks">
+          <div class="axis-mark">法式规整<span class="line2">意式文艺</span></div>
+          <div class="axis-mark">新古典<span class="line2">工业风</span></div>
+          <div class="axis-mark">现代极简<span class="line2">新中式</span></div>
+          <div class="axis-mark">日式<span class="line2">侘寂</span></div>
+          <div class="axis-mark">英式乡村<span class="line2">自然花境</span></div>
+          <div class="axis-mark">野趣花园<span class="line2">生态湿地</span></div>
+        </div>
+      </div>
+      <div class="axis-rule">
+        <b>判读要点</b>:左侧越靠左,维护成本越高(持续修剪 + 季节性替换);右侧越靠右,越依赖本地气候与植物条件。
+      </div>
+    </div>
+
+    <!-- 轴 B -->
+    <div class="axis-block">
+      <h3>坐标轴 B · 封闭 ↔ 开放(空间形态)</h3>
+      <div class="sub">越向左,围墙与廊越多;越向右,借景与远眺越多。</div>
+      <div class="axis-scale">
+        <div class="axis-line"></div>
+        <div class="axis-end left">内向围合</div>
+        <div class="axis-end right">外向延展</div>
+        <div class="axis-marks">
+          <div class="axis-mark">中式院落<span class="line2">苏式园林</span></div>
+          <div class="axis-mark">摩尔式<span class="line2">侘寂庭院</span></div>
+          <div class="axis-mark">日式坪庭<span class="line2">西班牙patio</span></div>
+          <div class="axis-mark">托斯卡纳<span class="line2">普罗旺斯</span></div>
+          <div class="axis-mark">地中海露台<span class="line2">希腊蓝白</span></div>
+          <div class="axis-mark">英式风景园<span class="line2">热带度假</span></div>
+        </div>
+      </div>
+      <div class="axis-rule">
+        <b>判读要点</b>:左侧适合<b>小尺度 + 城市 + 隐私</b>;右侧需要<b>大尺度 + 远景 + 不被城市切断</b>。
+      </div>
+    </div>
+
+    <!-- 四象限 -->
+    <div class="quadrant">
+      <div class="quad-grid">
+        <div class="quad-cell">
+          <div class="quad-label">QUADRANT 01 · 人工 × 封闭</div>
+          <div class="quad-title">几何 + 内向 + 仪式</div>
+          <div class="quad-styles">摩尔式庭院 · 法式 patio · 工业屋顶</div>
+        </div>
+        <div class="quad-cell">
+          <div class="quad-label">QUADRANT 02 · 人工 × 开放</div>
+          <div class="quad-title">几何 + 远景 + 庄园感</div>
+          <div class="quad-styles">法式规整 · 意式文艺复兴 · 新古典</div>
+        </div>
+        <div class="quad-cell">
+          <div class="quad-label">QUADRANT 03 · 自然 × 封闭</div>
+          <div class="quad-title">自然 + 内向 + 精神性</div>
+          <div class="quad-styles">日式坪庭 · 侘寂 · 苏式园林</div>
+        </div>
+        <div class="quad-cell">
+          <div class="quad-label">QUADRANT 04 · 自然 × 开放</div>
+          <div class="quad-title">自然 + 远景 + 松弛</div>
+          <div class="quad-styles">英式风景园 · 自然主义 · 热带度假</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="axis-note">
+      跨象限混搭通常失败,<b>同象限不同体系</b>的混搭最容易成功(例如侘寂 + 现代极简,二者同属"自然 × 封闭")。
+    </div>
+  </div>
+
+  <!-- ============ 02 DNA ============ -->
+  <div class="section-title" id="dna">
+    <span class="idx">— 02</span>
+    <h2>5 个隐变量 · 风格 DNA</h2>
+    <span class="hint">新增风格时用于归类校验</span>
+  </div>
+  <p class="section-lead">
+    10 大体系的真正差异不在名字,而在以下 5 个变量。每个风格的 DNA 几乎可以被这 5 项穷尽。
+  </p>
+
+  <table class="dna-table">
+    <thead>
+      <tr>
+        <th>变量</th>
+        <th>谱系样本</th>
+        <th>判断意义</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="var-name">植物姿态</td>
+        <td class="var-scale">修剪绿篱 <span class="arrow">→</span> 自然花境 <span class="arrow">→</span> 大叶热带 <span class="arrow">→</span> 多肉砾石</td>
+        <td class="var-meaning">视觉密度与季节性</td>
+      </tr>
+      <tr>
+        <td class="var-name">硬质比</td>
+        <td class="var-scale">全铺装露台 <span class="arrow">→</span> 半铺装 <span class="arrow">→</span> 草坪为主 <span class="arrow">→</span> 全植物覆盖</td>
+        <td class="var-meaning">维护成本 / 度假感 vs 园艺感</td>
+      </tr>
+      <tr>
+        <td class="var-name">围合方式</td>
+        <td class="var-scale">高墙内院 <span class="arrow">→</span> 矮墙花境 <span class="arrow">→</span> 借景开放 <span class="arrow">→</span> 无界融入</td>
+        <td class="var-meaning">精神性 vs 社交性</td>
+      </tr>
+      <tr>
+        <td class="var-name">色彩饱和</td>
+        <td class="var-scale">灰白单色 <span class="arrow">→</span> 大地色 <span class="arrow">→</span> 赤陶+白+蓝 <span class="arrow">→</span> 热带高饱和</td>
+        <td class="var-meaning">凉感 vs 暖感</td>
+      </tr>
+      <tr>
+        <td class="var-name">水的角色</td>
+        <td class="var-scale">仪式水池 <span class="arrow">→</span> 山水写意 <span class="arrow">→</span> 喷泉轴线 <span class="arrow">→</span> 度假泳池 <span class="arrow">→</span> 无水</td>
+        <td class="var-meaning">最强的风格定位信号</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="dna-example">
+    <div class="e-title">同元素不同搭档 = 不同风格</div>
+    <p style="margin: 0 0 14px; color: var(--ink-soft); font-size: 13.5px;">同样是<b>白墙</b>,搭档不同会导向完全不同的风格:</p>
+    <ul>
+      <li>白墙 + 蓝色 + 赤陶 + 橄榄树 <b>→ 地中海</b>(度假感)</li>
+      <li>白墙 + 灰瓦 + 苔藓 + 残石 <b>→ 侘寂</b>(精神性)</li>
+      <li>白墙 + 清水混凝土 + 单一草本 <b>→ 现代极简</b>(轻奢)</li>
+    </ul>
+    <div class="axis-note" style="margin-top: 18px;">
+      风格判断不能只看单一元素,必须看<b>元素的搭档组合</b>。
+    </div>
+  </div>
+
+  <!-- ============ 03 配对 ============ -->
+  <div class="section-title" id="pair">
+    <span class="idx">— 03</span>
+    <h2>10 体系的 5 组隐藏配对</h2>
+    <span class="hint">"相关风格对比"模块的核心来源</span>
+  </div>
+  <p class="section-lead">
+    按"主分类 + 相关风格关联"原则,10 个体系之间存在 5 组隐藏配对。每个风格详情页的"相关风格"卡片,都从这里展开。
+  </p>
+
+  <div class="pair-list">
+    <div class="pair-card">
+      <div class="pair-head">
+        <span class="pair-no">PAIR 01</span>
+        <span class="pair-title">东方<span class="vs">↔</span>现代自然主义与极简</span>
+      </div>
+      <div class="pair-rows">
+        <div class="k">共享</div>
+        <div class="v">留白 + 精神性 + 低饱和</div>
+        <div class="k">区别</div>
+        <div class="v">东方有<b>符号</b>(松、苔、白墙灰瓦、廊);极简只有<b>质感</b>(混凝土、不锈钢、单一草本)</div>
+        <div class="k">判读</div>
+        <div class="v">侘寂 / 新中式 / 现代禅意常被错认为是不同风格,实质是<b>同一气质在不同时代的版本</b></div>
+      </div>
+    </div>
+
+    <div class="pair-card">
+      <div class="pair-head">
+        <span class="pair-no">PAIR 02</span>
+        <span class="pair-title">欧洲古典<span class="vs">↔</span>欧洲乡村</span>
+      </div>
+      <div class="pair-rows">
+        <div class="k">共享</div>
+        <div class="v">欧洲基因(花卉传统 + 石材工艺)</div>
+        <div class="k">对立</div>
+        <div class="v">古典 = <b>贵族秩序</b>(轴线、雕塑、绿篱);乡村 = <b>农庄松弛</b>(花境、果树、铸铁桌)</div>
+        <div class="k">判读</div>
+        <div class="v">这两个体系<b>永远不该在同一空间混搭</b>——会消解彼此的核心气质</div>
+      </div>
+    </div>
+
+    <div class="pair-card">
+      <div class="pair-head">
+        <span class="pair-no">PAIR 03</span>
+        <span class="pair-title">地中海<span class="vs">↔</span>热带度假</span>
+      </div>
+      <div class="pair-rows">
+        <div class="k">共享</div>
+        <div class="v">度假感 + 户外生活</div>
+        <div class="k">对立</div>
+        <div class="v">地中海 = <b>干暖 + 香草 + 橄榄 + 蓝白</b>;热带 = <b>湿热 + 大叶 + 棕榈 + 高饱和</b></div>
+        <div class="k">判读</div>
+        <div class="v">中国南方常见误用——把热带植物配地中海建筑,植物会徒长,建筑会显脏</div>
+      </div>
+    </div>
+
+    <div class="pair-card">
+      <div class="pair-head">
+        <span class="pair-no">PAIR 04</span>
+        <span class="pair-title">工业与都市<span class="vs">↔</span>干旱与沙漠</span>
+      </div>
+      <div class="pair-rows">
+        <div class="k">共享</div>
+        <div class="v">硬质主导 + 极简植物 + 排水优先</div>
+        <div class="k">互补</div>
+        <div class="v">都市靠<b>结构</b>(混凝土、钢、垂直绿化);沙漠靠<b>地表</b>(砾石、岩石、多肉)</div>
+        <div class="k">判读</div>
+        <div class="v"><b>屋顶花园</b>最常做成"工业 + 干旱"的混合体——这是被低估的实用组合</div>
+      </div>
+    </div>
+
+    <div class="pair-card">
+      <div class="pair-head">
+        <span class="pair-no">PAIR 05</span>
+        <span class="pair-title">乡村农庄<span class="vs">↔</span>当代混搭</span>
+      </div>
+      <div class="pair-rows">
+        <div class="k">共享</div>
+        <div class="v">叙事性 + 个性化</div>
+        <div class="k">区别</div>
+        <div class="v">农庄叙事来自<b>生活</b>(菜地、果树、鸡舍);混搭叙事来自<b>设计师概念</b></div>
+        <div class="k">判读</div>
+        <div class="v">真正高级的私人花园往往是这两类的合体——<b>菜园 + 艺术装置</b>是被低估的方向</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 04 漏斗 ============ -->
+  <div class="section-title" id="funnel">
+    <span class="idx">— 04</span>
+    <h2>风格选择漏斗 · 4 步做减法</h2>
+    <span class="hint">从 50+ 风格筛到 3–5 个候选</span>
+  </div>
+  <p class="section-lead">
+    对"个人长期使用"的目标,真正的难点不是认识风格,而是做减法。按以下 4 步漏斗筛选。
+  </p>
+
+  <div class="funnel">
+
+    <div class="step">
+      <div class="step-head">
+        <span class="step-no">STEP 01</span>
+        <span class="step-title">气候硬约束</span>
+        <span class="step-aim">先砍掉一半 · 10 体系 → 5–6 候选</span>
+      </div>
+      <table class="step-table">
+        <thead><tr><th>气候</th><th>必须放弃</th><th>原因</th></tr></thead>
+        <tbody>
+          <tr><td>夏湿冬冷(长三角、华中)</td><td>热带、地中海、沙漠</td><td>养不活 / 维护不了</td></tr>
+          <tr><td>干旱(华北、西北)</td><td>英式乡村、热带、自然花境</td><td>花境会枯,湿度不足</td></tr>
+          <tr><td>湿热(华南)</td><td>干旱、沙漠、地中海</td><td>砾石易长青苔,植物烂根</td></tr>
+          <tr><td>寒冷(东北)</td><td>地中海、热带、亚热带</td><td>大部分代表植物不耐寒</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <span class="step-no">STEP 02</span>
+        <span class="step-title">维护带宽</span>
+        <span class="step-aim">再砍一半 · 落地能力筛选</span>
+      </div>
+      <table class="step-table">
+        <thead><tr><th>维护成本</th><th>体系</th><th>关键负担</th></tr></thead>
+        <tbody>
+          <tr><td>极高</td><td>法式规整、英式乡村、热带</td><td>绿篱日日修 / 多季节花境 / 湿度+清扫</td></tr>
+          <tr><td>中</td><td>地中海、新中式、农庄、自然主义</td><td>季节性维护</td></tr>
+          <tr><td>低</td><td>侘寂、沙漠/砾石、现代极简、工业</td><td>老化即美 / 耐旱 / 硬质为主</td></tr>
+        </tbody>
+      </table>
+      <div class="step-quote">不愿请园丁的话,只能在"低 + 中"带选。这一步往往砍掉所有"看起来最美的"。</div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <span class="step-no">STEP 03</span>
+        <span class="step-title">与室内风格的气质连续性</span>
+        <span class="step-aim">穿过门那一秒不能断裂</span>
+      </div>
+      <table class="step-table">
+        <thead><tr><th>室内风格</th><th>应配室外</th><th>不该配</th></tr></thead>
+        <tbody>
+          <tr><td>新中式 / 侘寂</td><td>东方庭院 · 现代极简 · 自然主义</td><td>地中海 · 热带 · 英式乡村</td></tr>
+          <tr><td>现代极简</td><td>现代极简 · 侘寂 · 干旱砾石</td><td>法式规整 · 英式乡村 · 农庄</td></tr>
+          <tr><td>北欧 / Japandi</td><td>自然主义 · 侘寂 · 林缘庭院</td><td>地中海 · 热带 · 工业</td></tr>
+          <tr><td>美式 / 法式</td><td>英式乡村 · 法式规整 · 新古典</td><td>侘寂 · 热带 · 工业</td></tr>
+          <tr><td>度假 / 海岛</td><td>地中海 · 热带 · 希腊蓝白</td><td>东方 · 新古典 · 工业</td></tr>
+          <tr><td>工业 / loft</td><td>工业庭院 · 都市屋顶 · 干旱砾石</td><td>东方 · 乡村 · 古典</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <span class="step-no">STEP 04</span>
+        <span class="step-title">空间尺度匹配</span>
+        <span class="step-aim">尺度不对再喜欢也用不了</span>
+      </div>
+      <table class="step-table">
+        <thead><tr><th>空间尺度</th><th>适合体系</th><th>判读</th></tr></thead>
+        <tbody>
+          <tr><td>小庭院 / 内院 / 阳台</td><td>东方庭院 · 侘寂 · 摩尔式 · 城市微花园</td><td>越小越要"内向围合"</td></tr>
+          <tr><td>中庭院</td><td>地中海 · 新中式 · 自然主义 · 英式乡村</td><td>主力候选区,选择最多</td></tr>
+          <tr><td>大庭院 / 庄园</td><td>法式规整 · 英式风景园 · 热带度假</td><td>没有体量撑不起</td></tr>
+          <tr><td>露台 / 屋顶</td><td>地中海 · 工业 · 干旱 · 现代极简</td><td>必须轻量 + 耐风 + 排水好</td></tr>
+          <tr><td>泳池区</td><td>地中海 · 热带 · 现代极简 · 希腊蓝白</td><td>泳池是定调元素</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ============ 05 应用方式 ============ -->
+  <div class="section-title" id="use">
+    <span class="idx">— 05</span>
+    <h2>应用方式</h2>
+    <span class="hint">本框架在资料库中的使用位置</span>
+  </div>
+
+  <div class="use-list">
+    <div class="use-row">
+      <div class="use-no">01</div>
+      <div class="use-text"><b>新增风格归类时</b>:用"两根坐标轴 + 5 个隐变量"做归属校验,确认主分类与相关风格。</div>
+    </div>
+    <div class="use-row">
+      <div class="use-no">02</div>
+      <div class="use-text"><b>写"相关风格对比"字段时</b>:从 5 组隐藏配对中找参照。</div>
+    </div>
+    <div class="use-row">
+      <div class="use-no">03</div>
+      <div class="use-text"><b>个人标记判断时</b>:走 4 步漏斗,把"看起来都喜欢"过滤为"实际能用"。</div>
+    </div>
+    <div class="use-row">
+      <div class="use-no">04</div>
+      <div class="use-text"><b>建立中国地区适配速查表时</b>(待做):以 Step 1 气候约束为基础展开。</div>
+    </div>
+    <div class="use-row">
+      <div class="use-no">05</div>
+      <div class="use-text"><b>建立室内外衔接矩阵时</b>(待做):以 Step 3 气质连续性为基础展开。</div>
+    </div>
+  </div>
+
+  <!-- ============ 06 待补 ============ -->
+  <div class="section-title" id="todo">
+    <span class="idx">— 06</span>
+    <h2>待补条目</h2>
+    <span class="hint">框架的下一步扩展</span>
+  </div>
+
+  <div class="todo-list">
+    <div class="todo-row"><span class="box"></span><span>中国地区适配速查表(华东 / 华南 / 华北 / 西南 / 西北 / 东北 × 10 体系)</span></div>
+    <div class="todo-row"><span class="box"></span><span>维护难度子维度标签(浇灌频率 / 修剪频率 / 落叶清理 / 季节性更换)</span></div>
+    <div class="todo-row"><span class="box"></span><span>室内外衔接矩阵(独立成页)</span></div>
+    <div class="todo-row"><span class="box"></span><span>风格微对比卡片格式(基于 5 组隐藏配对)</span></div>
+  </div>
+
+  <!-- 底部 -->
+  <nav class="foot-nav">
+    <a href="index.html">← 返回首页</a>
+    <span>风格判断框架 · OUTDOOR STYLE ATLAS</span>
+  </nav>
+
+</div>
+
+</body>
+</html>

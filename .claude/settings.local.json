@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 /tmp/build_5new.py)",
+      "Bash(grep -n \"一池三山\\\\|一池映山\" /tmp/build_5new.py)",
+      "Read(//private/tmp/**)",
+      "Bash(python3 /tmp/refactor_images.py)"
+    ]
+  }
+}

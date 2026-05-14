@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>植物专题库 · Outdoor Style Atlas</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --bg-card: #fffdf7;
+    --ink: #1f1d1a;
+    --ink-soft: #4a463f;
+    --ink-mute: #8a8479;
+    --ink-faint: #b8b3a6;
+    --line: #e4dfd0;
+    --line-soft: #ede8d8;
+    --line-strong: #1f1d1a;
+    --hover: #f3efe3;
+    --tag-bg: #ede8d6;
+    --tag-ink: #5a4f33;
+    --accent: #6b5b3e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); }
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Helvetica", "Arial", sans-serif; color: var(--ink); font-size: 15px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 64px 96px; }
+
+  .crumb { font-size: 13px; color: var(--ink-mute); letter-spacing: 0.04em; margin-bottom: 32px; }
+  .crumb a { color: var(--ink-soft); }
+  .crumb a:hover { color: var(--accent); }
+  .crumb .sep { margin: 0 8px; color: var(--ink-faint); }
+  .crumb .current { color: var(--ink); }
+
+  .lib-hero { border-bottom: 1px solid var(--line); padding-bottom: 36px; margin-bottom: 40px; }
+  .lib-hero .icon { font-size: 36px; margin-bottom: 14px; line-height: 1; }
+  .lib-hero h1 { font-family: "Times New Roman", "Songti SC", serif; font-size: 40px; font-weight: 500; margin: 0 0 6px; letter-spacing: 0.01em; }
+  .lib-hero .en { font-family: "Times New Roman", serif; font-style: italic; font-size: 17px; color: var(--ink-mute); letter-spacing: 0.04em; margin-bottom: 22px; }
+  .lib-hero .lead { color: var(--ink-soft); font-size: 16px; max-width: 720px; margin-bottom: 8px; }
+
+  .building-notice { background: rgba(193,154,46,.08); border: 1px solid rgba(193,154,46,.25); border-radius: 4px; padding: 18px 24px; margin-bottom: 40px; color: var(--ink-soft); font-size: 14px; }
+  .building-notice b { color: var(--ink); font-weight: 600; }
+
+  .section-title { display: flex; align-items: baseline; gap: 14px; margin: 40px 0 18px; }
+  .section-title .idx { font-family: "Times New Roman", serif; font-size: 12px; color: var(--ink-mute); letter-spacing: 0.18em; }
+  .section-title h2 { font-family: "Times New Roman", "Songti SC", serif; font-size: 22px; font-weight: 500; margin: 0; letter-spacing: 0.02em; }
+  .section-title .hint { margin-left: auto; color: var(--ink-mute); font-size: 13px; }
+
+  .cat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .cat-card { background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 22px 24px; }
+  .cat-card h3 { margin: 0 0 12px; font-size: 16px; font-weight: 600; color: var(--ink); letter-spacing: 0.02em; }
+  .cat-card ul { margin: 0; padding: 0; list-style: none; color: var(--ink-soft); font-size: 14px; line-height: 1.85; }
+  .cat-card li { display: flex; align-items: baseline; gap: 10px; padding: 4px 0; }
+  .cat-card li a { display: flex; align-items: baseline; gap: 10px; width: 100%; transition: color .15s; }
+  .cat-card li a:hover { color: var(--accent); }
+  .cat-card li.linked::before { content: "→"; color: var(--accent); font-family: "Times New Roman", serif; font-size: 12px; }
+  .cat-card li .en { font-family: "Times New Roman", serif; font-style: italic; font-size: 12.5px; color: var(--ink-mute); }
+
+  .framework { background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 28px 32px; }
+  .framework ul { margin: 0; padding-left: 18px; color: var(--ink-soft); font-size: 14px; line-height: 2; columns: 2; column-gap: 40px; }
+  .framework li::marker { color: var(--ink-faint); }
+
+  .foot-nav { margin-top: 64px; padding-top: 28px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; color: var(--ink-mute); font-size: 13px; }
+  .foot-nav a { color: var(--ink-soft); }
+  .foot-nav a:hover { color: var(--accent); }
+
+  @media (max-width: 880px) {
+    .wrap { padding: 32px 24px 64px; }
+    .lib-hero h1 { font-size: 30px; }
+    .cat-grid { grid-template-columns: 1fr; }
+    .framework ul { columns: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="crumb">
+    <a href="index.html">首页</a>
+    <span class="sep">/</span>
+    <span class="current">植物专题库</span>
+  </div>
+
+  <section class="lib-hero">
+    <div class="icon">🌿</div>
+    <h1>植物专题库</h1>
+    <div class="en">Plant Library</div>
+    <p class="lead">
+      按"<b>植物专题 + 生态</b>"组织的室外植栽配置——玫瑰花园、花境、香草园、砾石花园、雨水花园、耐旱植物等。
+      它回答的不是"<b>这是什么风格</b>",而是"<b>这一片植物群该怎么组织</b>"——是 4 库系统里"<b>从植物出发</b>"的入口。
+    </p>
+  </section>
+
+  <div class="building-notice">
+    <b>建设中</b>:本库目前已完成总体分类与分析框架,<b>玫瑰花园</b>等首批专题页已有 md 草稿。后续每个专题都会展开为独立页面,包含植物选择、配置方式、维护要点、生态价值等完整分析。
+  </div>
+
+  <div class="section-title">
+    <span class="idx">— 01</span>
+    <h2>植物专题分类 / Categories</h2>
+    <span class="hint">点击进入专题详情页(陆续上线)</span>
+  </div>
+
+  <div class="cat-grid">
+
+    <div class="cat-card">
+      <h3>花卉花园</h3>
+      <ul>
+        <li class="linked"><a href="plant-rose-garden.html">玫瑰花园 <span class="en">Rose Garden</span></a></li>
+        <li class="linked"><a href="style-border.html">花境花园 <span class="en">Border Garden</span></a></li>
+        <li>球茎花园 <span class="en">Bulb Garden</span></li>
+        <li>野花花园 <span class="en">Wildflower Garden</span></li>
+      </ul>
+    </div>
+
+    <div class="cat-card">
+      <h3>功能花园</h3>
+      <ul>
+        <li>香草园 <span class="en">Herb Garden</span></li>
+        <li>菜园 <span class="en">Vegetable Garden</span></li>
+        <li>果树园 <span class="en">Orchard</span></li>
+        <li>药用花园 <span class="en">Medicinal Garden</span></li>
+      </ul>
+    </div>
+
+    <div class="cat-card">
+      <h3>景观专题</h3>
+      <ul>
+        <li>砾石花园 <span class="en">Gravel Garden</span></li>
+        <li>石质庭院 <span class="en">Rock Garden</span></li>
+        <li>雨水花园 <span class="en">Rain Garden</span></li>
+        <li>生态湿地 <span class="en">Ecological Wetland</span></li>
+      </ul>
+    </div>
+
+    <div class="cat-card">
+      <h3>气候适应</h3>
+      <ul>
+        <li>耐旱花园 <span class="en">Drought-Tolerant Garden</span></li>
+        <li>耐阴花园 <span class="en">Shade Garden</span></li>
+        <li>耐盐花园 <span class="en">Salt-Tolerant Garden</span></li>
+        <li>抗风花园 <span class="en">Wind-Resistant Garden</span></li>
+      </ul>
+    </div>
+
+    <div class="cat-card">
+      <h3>生态系统</h3>
+      <ul>
+        <li>本土植物花园 <span class="en">Native Plant Garden</span></li>
+        <li>蝴蝶花园 <span class="en">Butterfly Garden</span></li>
+        <li>鸟类花园 <span class="en">Bird Garden</span></li>
+        <li>野生动物花园 <span class="en">Wildlife Garden</span></li>
+      </ul>
+    </div>
+
+    <div class="cat-card">
+      <h3>特色花园</h3>
+      <ul>
+        <li>竹园 <span class="en">Bamboo Garden</span></li>
+        <li>松树园 <span class="en">Pine Garden</span></li>
+        <li>棕榈园 <span class="en">Palm Garden</span></li>
+        <li>藤本花园 <span class="en">Vine Garden</span></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="section-title">
+    <span class="idx">— 02</span>
+    <h2>分析框架 / Framework</h2>
+    <span class="hint">每个专题页的标准研究维度</span>
+  </div>
+
+  <div class="framework">
+    <ul>
+      <li>🌱 植物选择(代表 / 品种 / 习性 / 生态)</li>
+      <li>📐 配置方式(布局 / 层次 / 色彩 / 空间)</li>
+      <li>🌤️ 气候适应(温度 / 湿度 / 光照 / 土壤)</li>
+      <li>🛠️ 维护要点(浇水 / 施肥 / 修剪 / 病虫)</li>
+      <li>💰 成本分析(种植 / 维护 / 生命周期)</li>
+      <li>🎨 设计应用(风格适配 / 空间 / 季节 / 视觉)</li>
+      <li>🔬 生态价值(多样性 / 环境 / 可持续 / 教育)</li>
+      <li>🔗 跨库链接(适合风格 / 对应空间 / 配套场景)</li>
+    </ul>
+  </div>
+
+  <nav class="foot-nav">
+    <a href="index.html">← 返回首页</a>
+    <span>植物专题库 · OUTDOOR STYLE ATLAS</span>
+  </nav>
+
+</div>
+
+</body>
+</html>

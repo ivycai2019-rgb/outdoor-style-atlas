@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outdoor Style Atlas · 私人室外设计风格导航</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --bg-card: #fffdf7;
+    --ink: #1f1d1a;
+    --ink-soft: #4a463f;
+    --ink-mute: #8a8479;
+    --ink-faint: #b8b3a6;
+    --line: #e4dfd0;
+    --line-soft: #ede8d8;
+    --line-strong: #1f1d1a;
+    --hover: #f3efe3;
+    --tag-bg: #ede8d6;
+    --tag-ink: #5a4f33;
+    --accent: #6b5b3e;
+    --status-saved: #6b8e4e;
+    --status-pending: #c19a2e;
+    --status-partial: #5b7a8a;
+    --status-unfit: #a85a4a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  .wrap {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 64px 64px 96px;
+  }
+
+  /* ===== 顶部 ===== */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 32px;
+    padding-bottom: 40px;
+  }
+  .title h1 {
+    font-family: "Times New Roman", "Songti SC", serif;
+    font-size: 40px;
+    font-weight: 500;
+    margin: 0 0 10px;
+    letter-spacing: 0.01em;
+  }
+  .title .sub {
+    color: var(--ink-mute);
+    font-size: 15px;
+    margin: 0 0 28px;
+    letter-spacing: 0.02em;
+  }
+  .title .stats {
+    display: flex;
+    gap: 24px;
+    color: var(--ink-mute);
+    font-size: 14px;
+  }
+  .title .stats .dot { color: var(--ink-faint); margin: 0 4px; }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--bg-card);
+    cursor: pointer;
+    transition: background .15s, transform .15s;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .pill:hover { background: var(--hover); }
+  .pill-link {
+    background: transparent;
+    border-color: var(--ink-mute);
+    color: var(--ink-soft);
+  }
+  .pill-link:hover { background: var(--hover); border-color: var(--ink); color: var(--ink); }
+  .pill .count {
+    background: var(--ink);
+    color: var(--bg-card);
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 4px;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  /* ===== 4 库入口 ===== */
+  .libs {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+  .lib {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 14px 14px 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color .15s, background .15s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 110px;
+    position: relative;
+  }
+  .lib:hover { border-color: var(--ink); background: var(--hover); }
+  .lib-active { border-color: var(--ink-soft); }
+  .lib-icon { font-size: 20px; line-height: 1; margin-bottom: 4px; }
+  .lib-name { font-size: 13.5px; font-weight: 600; color: var(--ink); letter-spacing: 0.01em; line-height: 1.4; }
+  .lib-en {
+    font-family: "Times New Roman", serif;
+    font-style: italic;
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.04em;
+  }
+  .lib-desc {
+    margin-top: auto;
+    padding-top: 8px;
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .lib-status {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 10px;
+    color: var(--ink-mute);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .lib-active .lib-status { color: var(--accent); }
+
+  /* 库分区标题 */
+  .lib-section-title {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin: 0 0 18px;
+    padding-top: 8px;
+  }
+  .lib-section-title .lib-idx {
+    font-family: "Times New Roman", serif;
+    font-size: 12px;
+    color: var(--ink-mute);
+    letter-spacing: 0.18em;
+  }
+  .lib-section-title h2 {
+    font-family: "Times New Roman", "Songti SC", serif;
+    font-size: 24px;
+    font-weight: 500;
+    margin: 0;
+    letter-spacing: 0.02em;
+  }
+  .lib-section-title .lib-hint {
+    margin-left: auto;
+    color: var(--ink-mute);
+    font-size: 13px;
+  }
+
+  @media (max-width: 1180px) {
+    .libs { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 800px) {
+    .libs { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 540px) {
+    .libs { grid-template-columns: 1fr; }
+  }
+
+  /* ===== 图例 ===== */
+  .legend {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 0;
+    display: flex;
+    gap: 28px;
+    color: var(--ink-soft);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+  .legend .gap { flex: 1; }
+  .legend .hint { color: var(--ink-mute); }
+
+  /* ===== 体系列表 ===== */
+  .system-list { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+  .system {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    transition: box-shadow .2s, border-color .2s;
+    overflow: hidden;
+  }
+  .system:hover {
+    border-color: var(--ink-faint);
+    box-shadow: 0 1px 2px rgba(31,29,26,.03), 0 8px 24px rgba(31,29,26,.04);
+  }
+
+  .system-head {
+    display: grid;
+    grid-template-columns: 24px auto 1fr auto;
+    align-items: center;
+    padding: 12px 22px;
+    gap: 2px 16px;
+    cursor: pointer;
+  }
+  .caret {
+    color: var(--ink-mute);
+    font-size: 11px;
+    transition: transform .2s;
+    padding-top: 0;
+  }
+  .system.open .caret { transform: rotate(90deg); }
+
+  .system-titles {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 220px;
+    flex-wrap: wrap;
+  }
+  .system-titlerow { display: flex; align-items: baseline; gap: 10px; }
+  .system-no {
+    font-family: "Times New Roman", serif;
+    font-size: 13px;
+    color: var(--ink-mute);
+    letter-spacing: 0.14em;
+  }
+  .system-cn {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+  }
+  a.system-cn { transition: color .15s; }
+  a.system-cn:hover { color: var(--accent); }
+  .enter-arrow {
+    color: var(--ink-faint);
+    font-size: 14px;
+    font-weight: 400;
+    margin-left: 6px;
+    font-family: "Times New Roman", serif;
+    transition: color .15s, transform .15s;
+    display: inline-block;
+  }
+  a.system-cn:hover .enter-arrow { color: var(--accent); transform: translateX(3px); }
+  .system-en {
+    font-family: "Times New Roman", serif;
+    color: var(--ink-mute);
+    font-size: 12px;
+    font-style: italic;
+    letter-spacing: 0.04em;
+  }
+
+  .system-mid {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    padding-top: 0;
+  }
+  .system-mood {
+    color: var(--ink-soft);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+  .system-def { display: none; }
+
+  .system-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--ink-mute);
+    white-space: nowrap;
+    padding-top: 0;
+  }
+  .system-meta .count-row { display: flex; gap: 16px; }
+  .system-meta .count-row .marked { color: var(--ink-soft); }
+  .status-dots { display: flex; gap: 6px; }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    display: inline-block;
+  }
+  .dot.saved   { background: var(--status-saved); }
+  .dot.pending { background: var(--status-pending); }
+  .dot.partial { background: var(--status-partial); }
+  .dot.unfit   { background: var(--status-unfit); }
+
+  /* ===== 体系展开内容 ===== */
+  .system-body {
+    display: none;
+    padding: 8px 28px 24px 60px;
+    border-top: 1px dashed var(--line);
+    background: linear-gradient(to bottom, rgba(237,232,216,.18), transparent 80px);
+  }
+  .system.open .system-body { display: block; }
+  .style-row {
+    display: flex;
+    align-items: center;
+    padding: 11px 0;
+    gap: 14px;
+    color: var(--ink-soft);
+    font-size: 14px;
+    border-bottom: 1px dashed var(--line-soft);
+  }
+  .style-row:last-child { border-bottom: none; }
+  a.style-row { text-decoration: none; color: var(--ink-soft); transition: background .12s, color .12s; }
+  a.style-row:hover { background: var(--hover); color: var(--ink); }
+  a.style-row:hover .cn { color: var(--accent); }
+  .row-arrow {
+    color: var(--ink-faint);
+    font-family: "Times New Roman", serif;
+    font-size: 14px;
+    margin-left: auto;
+    transition: transform .15s, color .15s;
+  }
+  a.style-row:hover .row-arrow { color: var(--accent); transform: translateX(3px); }
+  .style-row .mark {
+    width: 16px;
+    color: var(--ink-mute);
+    font-size: 12px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+  .style-row .cn { color: var(--ink); min-width: 140px; }
+  .style-row .en {
+    color: var(--ink-mute);
+    font-size: 13px;
+    flex: 1;
+    font-family: "Times New Roman", serif;
+    font-style: italic;
+    letter-spacing: 0.03em;
+  }
+  .style-row .status {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+  }
+  .style-row .status.saved   { color: var(--status-saved);   background: rgba(107,142,78,.10); }
+  .style-row .status.pending { color: var(--status-pending); background: rgba(193,154,46,.10); }
+  .style-row .status.partial { color: var(--status-partial); background: rgba(91,122,138,.10); }
+  .style-row .status.unfit   { color: var(--status-unfit);   background: rgba(168,90,74,.10); }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 980px) {
+    .wrap { padding: 40px 24px 64px; }
+    .header { flex-direction: column; }
+    .title h1 { font-size: 30px; }
+    .system-head {
+      grid-template-columns: 24px 1fr;
+      gap: 4px 14px;
+    }
+    .system-mid { grid-column: 2; }
+    .system-meta {
+      grid-column: 2;
+      align-items: flex-start;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .system-en { display: none; }
+    .legend { flex-wrap: wrap; gap: 12px 20px; }
+    .system-body { padding-left: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- 顶部 -->
+  <header class="header">
+    <div class="title">
+      <h1>Outdoor Style Atlas</h1>
+      <p class="sub">私人室外设计导航 · 4 库综合系统 · Personal Outdoor Design Reference</p>
+      <div class="stats">
+        <span>10 个风格体系</span>
+        <span class="dot">·</span>
+        <span>50+ 风格条目</span>
+        <span class="dot">·</span>
+        <span>4 个知识库</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a class="pill pill-link" href="framework.html">
+        <span>◇</span>
+        <span>判断框架</span>
+      </a>
+      <button class="pill">
+        <span>★</span>
+        <span>收藏 · 待定</span>
+        <span class="count" id="markedCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 6 库入口 -->
+  <section class="libs">
+    <a class="lib" href="https://style-atlas-three.vercel.app/" target="_blank" rel="noopener">
+      <div class="lib-icon">🛋</div>
+      <div class="lib-name">室内设计风格库</div>
+      <div class="lib-en">Indoor Style Library</div>
+      <div class="lib-desc">室内空间审美与材料语言(外部链接 ↗)</div>
+      <div class="lib-status">外部</div>
+    </a>
+    <a class="lib lib-active" href="#systems">
+      <div class="lib-icon">🏛</div>
+      <div class="lib-name">室外设计风格库</div>
+      <div class="lib-en">Outdoor Style Library</div>
+      <div class="lib-desc">10 大体系 / 50+ 风格 — 审美与文化表达</div>
+      <div class="lib-status">已完成主体</div>
+    </a>
+    <a class="lib" href="style-preference.html">
+      <div class="lib-icon">📊</div>
+      <div class="lib-name">设计风格偏好分析</div>
+      <div class="lib-en">Preference Analysis</div>
+      <div class="lib-desc">室内 + 室外的风格偏好打分与画像</div>
+      <div class="lib-status">建设中</div>
+    </a>
+    <a class="lib" href="library-space.html">
+      <div class="lib-icon">🏡</div>
+      <div class="lib-name">空间类型库</div>
+      <div class="lib-en">Space Library</div>
+      <div class="lib-desc">前庭 / 后院 / 露台 / 屋顶 / 泳池 — 位置与功能</div>
+      <div class="lib-status">建设中</div>
+    </a>
+    <a class="lib" href="library-scene.html">
+      <div class="lib-icon">🎭</div>
+      <div class="lib-name">生活场景库</div>
+      <div class="lib-en">Scene Library</div>
+      <div class="lib-desc">用餐 / 冥想 / 园艺 / 聚会 — 使用方式与体验</div>
+      <div class="lib-status">建设中</div>
+    </a>
+    <a class="lib" href="library-plant.html">
+      <div class="lib-icon">🌿</div>
+      <div class="lib-name">植物专题库</div>
+      <div class="lib-en">Plant Library</div>
+      <div class="lib-desc">花境 / 香草 / 玫瑰 / 砾石 — 植栽与生态</div>
+      <div class="lib-status">建设中</div>
+    </a>
+  </section>
+
+  <!-- 风格库标题 -->
+  <div class="lib-section-title" id="systems">
+    <span class="lib-idx">— 01</span>
+    <h2>设计风格库 / Style Library</h2>
+    <span class="lib-hint">10 个一级风格体系 · 50+ 风格条目</span>
+  </div>
+
+  <!-- 图例 -->
+  <div class="legend">
+    <span>★ 核心风格</span>
+    <span>◎ 补充</span>
+    <span>△ 边缘</span>
+    <span class="gap"></span>
+    <span class="hint">点击体系标题展开 / 收起</span>
+  </div>
+
+  <!-- 体系列表 -->
+  <div class="system-list" id="systemList"></div>
+
+</div>
+
+<script>
+  const systems = [
+    {
+      no: "01",
+      cn: "东方庭院体系",
+      en: "Eastern Courtyard Systems",
+      mood: "东方 · 含蓄 · 留白 · 山水意境 · 围合 · 精神性",
+      def: "以院落为单元,借景、围合、留白,讲求精神性与四季流转。",
+      href: "system-eastern.html",
+      preview: ["中式庭院", "新中式", "侘寂", "枯山水"],
+      styles: [
+        { cn: "中式庭院",    en: "Chinese Courtyard Garden", mark: "★", status: null, href: "style-chinese.html" },
+        { cn: "宋式庭院",    en: "Song-style Garden",        mark: "★", status: null, href: "style-song.html" },
+        { cn: "新中式庭院",  en: "Modern Chinese Garden",    mark: "★", status: null, href: "style-modern-chinese.html" },
+        { cn: "苏式园林",    en: "Suzhou Garden",            mark: "◎", status: null, href: "style-suzhou.html" },
+        { cn: "岭南庭院",    en: "Lingnan Garden",           mark: "△", status: null, href: "style-lingnan.html" },
+        { cn: "日式庭院",    en: "Japanese Garden",          mark: "★", status: null, href: "style-japanese.html" },
+        { cn: "枯山水",      en: "Karesansui Garden",        mark: "★", status: null, href: "style-karesansui.html" },
+        { cn: "侘寂庭院",    en: "Wabi-Sabi Garden",         mark: "★", status: null, href: "style-wabi-sabi.html" },
+        { cn: "韩式庭院",    en: "Korean Garden",            mark: "△", status: null, href: "style-korean.html" },
+      ]
+    },
+    {
+      no: "02",
+      cn: "欧洲古典与庄园花园体系",
+      en: "European Classical & Estate Gardens",
+      mood: "秩序 · 轴线 · 比例 · 仪式感 · 古典 · 庄园感",
+      def: "对称轴线、几何绿篱与庄园尺度,户外仪式感的源头。",
+      href: "system-classical.html",
+      preview: ["法式规整", "意式文艺复兴", "英式风景园", "新古典"],
+      styles: [
+        { cn: "法式规整花园",       en: "French Formal Garden",          mark: "★", status: null, href: "style-french-formal.html" },
+        { cn: "意大利文艺复兴花园", en: "Italian Renaissance Garden",    mark: "★", status: null, href: "style-italian-renaissance.html" },
+        { cn: "英式风景园",         en: "English Landscape Garden",      mark: "★", status: null, href: "style-english-landscape.html" },
+        { cn: "欧式庄园花园",       en: "European Estate Garden",        mark: "◎", status: null, href: "style-european-estate.html" },
+        { cn: "新古典庭院",         en: "Neoclassical Garden",           mark: "◎", status: null, href: "style-neoclassical.html" },
+      ]
+    },
+    {
+      no: "03",
+      cn: "欧洲乡村花园体系",
+      en: "European Country Gardens",
+      mood: "浪漫 · 自然 · 丰盛 · 松弛 · 生活气息 · 慢生活",
+      def: "花境、果树与质朴材料,把生活方式直接长进花园里。",
+      href: "system-country.html",
+      preview: ["英式乡村", "法式乡村", "普罗旺斯", "托斯卡纳"],
+      styles: [
+        { cn: "英式乡村花园", en: "English Cottage Garden", mark: "★", status: null, href: "style-english-cottage.html" },
+        { cn: "法式乡村花园", en: "French Country Garden",  mark: "★", status: null, href: "style-french-country.html" },
+        { cn: "普罗旺斯花园", en: "Provence Garden",        mark: "★", status: null, href: "style-provence.html" },
+        { cn: "托斯卡纳庭院", en: "Tuscan Garden",          mark: "★", status: null, href: "style-tuscan.html" },
+      ]
+    },
+    {
+      no: "04",
+      cn: "地中海与南欧度假体系",
+      en: "Mediterranean & Southern European Resort",
+      mood: "轻松 · 阳光 · 海风 · 白墙赤陶 · 露台感 · 度假",
+      def: "白墙、赤陶、橄榄与香草,户外用餐与露台生活的原型。",
+      href: "system-mediterranean.html",
+      preview: ["地中海", "西班牙", "希腊蓝白", "摩尔式"],
+      styles: [
+        { cn: "地中海庭院",       en: "Mediterranean Courtyard",  mark: "★", status: null, href: "style-mediterranean.html" },
+        { cn: "西班牙庭院",       en: "Spanish Courtyard",        mark: "★", status: null, href: "style-spanish.html" },
+        { cn: "安达卢西亚庭院",   en: "Andalusian Patio",         mark: "★", status: null, href: "style-andalusian.html" },
+        { cn: "意式地中海庭院",   en: "Italian Mediterranean Garden", mark: "★", status: null, href: "style-italian-med.html" },
+        { cn: "希腊蓝白庭院",     en: "Greek Island Garden",      mark: "★", status: null, href: "style-greek.html" },
+        { cn: "摩尔式庭院",       en: "Moorish Patio",            mark: "★", status: null, href: "style-moorish.html" },
+      ]
+    },
+    {
+      no: "05",
+      cn: "现代自然主义与极简体系",
+      en: "Modern Naturalism & Minimal",
+      mood: "简洁 · 低调 · 材料质感 · 自然过渡 · 静谧 · 轻奢",
+      def: "用材质与留白替代符号,室内现代风格的自然延展。",
+      href: "system-modern.html",
+      preview: ["现代庭院", "极简景观", "自然主义", "现代禅意"],
+      styles: [
+        { cn: "现代庭院",       en: "Modern Garden",            mark: "★", status: null, href: "style-modern-garden.html" },
+        { cn: "极简景观",       en: "Minimal Landscape",        mark: "★", status: null, href: "style-minimal-landscape.html" },
+        { cn: "现代禅意庭院",   en: "Contemporary Zen Garden",  mark: "★", status: null, href: "style-contemporary-zen.html" },
+        { cn: "自然主义庭院",   en: "Naturalistic Garden",      mark: "★", status: null, href: "style-naturalistic.html" },
+      ]
+    },
+    {
+      no: "06",
+      cn: "热带与亚热带度假体系",
+      en: "Tropical & Subtropical Resort",
+      mood: "丰盛 · 湿润 · 野趣 · 度假 · 热带风情 · 热烈",
+      def: "大叶植物、棕榈与水景,把度假岛屿气质带回庭院。",
+      href: "system-tropical.html",
+      preview: ["热带雨林", "巴厘风", "现代热带", "海岛度假"],
+      styles: [
+        { cn: "热带雨林庭园",  en: "Tropical Garden",         mark: "★", status: null, href: "style-tropical.html" },
+        { cn: "海岛度假花园",  en: "Resort Garden",           mark: "★", status: null, href: "style-resort.html" },
+        { cn: "巴厘风庭院",    en: "Balinese Garden",         mark: "★", status: null, href: "style-balinese.html" },
+        { cn: "现代热带庭院",  en: "Modern Tropical Garden",  mark: "◎", status: null, href: "style-modern-tropical.html" },
+      ]
+    },
+    {
+      no: "07",
+      cn: "工业与都市景观体系",
+      en: "Industrial & Urban Landscape",
+      mood: "硬朗 · 结构感 · 都市纹理 · 材质对比 · 精致粗犷",
+      def: "砖、混凝土、钢与垂直绿化,城市中的紧凑户外秩序。",
+      href: "system-industrial.html",
+      preview: ["工业风庭院", "都市微型花园"],
+      styles: [
+        { cn: "工业风庭院",     en: "Industrial Garden",        mark: "★", status: null, href: "style-industrial.html" },
+        { cn: "都市微型花园",   en: "Urban Pocket Garden",      mark: "★", status: null, href: "style-urban-pocket.html" },
+      ]
+    },
+    {
+      no: "08",
+      cn: "乡村农庄与生态花园体系",
+      en: "Farmhouse & Ecological Gardens",
+      mood: "质朴 · 生态 · 自然过程 · 本土植物 · 慢生活",
+      def: "现代生态主义与农庄传统的合体——本土植物、自然演替、家庭参与,把生态思想做成可居住的花园。",
+      href: "system-farmhouse.html",
+      preview: ["农庄庭园", "现代农庄", "生态自然主义"],
+      styles: [
+        { cn: "农庄庭园",         en: "Farmhouse Garden",                 mark: "★", status: null, href: "style-farmhouse.html" },
+        { cn: "现代农庄庭院",     en: "Modern Farmhouse Garden",          mark: "★", status: null, href: "style-modern-farmhouse.html" },
+        { cn: "生态自然主义庭院", en: "Ecological Naturalistic Garden",   mark: "★", status: null, href: "style-ecological-naturalistic.html" },
+      ]
+    },
+    {
+      no: "09",
+      cn: "干旱与沙漠景观体系",
+      en: "Desert & Drought-Tolerant Landscape",
+      mood: "简洁 · 明亮 · 耐旱 · 排水性 · 原始 · 阳光",
+      def: "砾石、岩石与多肉,低维护与节水设计的典型。",
+      href: "system-desert.html",
+      preview: ["砾石庭院", "现代耐旱"],
+      styles: [
+        { cn: "砾石庭院",     en: "Gravel Garden",            mark: "★", status: null, href: "style-gravel.html" },
+        { cn: "现代耐旱庭院", en: "Drought-Tolerant Garden",  mark: "★", status: null, href: "style-drought-tolerant.html" },
+      ]
+    },
+    {
+      no: "10",
+      cn: "美式庭院体系",
+      en: "American Garden Systems",
+      mood: "宽敞 · 实用 · 休闲 · 家庭感 · 草坪文化 · 户外生活",
+      def: "受英式乡村影响的美洲花园传统,从前廊摇椅到中世纪现代——把家庭日常做成庭院核心。",
+      href: "system-american.html",
+      preview: ["美式乡村", "现代美式"],
+      styles: [
+        { cn: "美式乡村花园",   en: "American Cottage Garden",     mark: "★", status: null, href: "style-american-cottage.html" },
+        { cn: "现代美式庭院",   en: "Modern American Garden",      mark: "★", status: null, href: "style-modern-american.html" },
+      ]
+    }
+  ];
+
+  const STATUS_LABEL = {
+    saved:   "已收藏",
+    pending: "待定",
+    partial: "可局部借鉴",
+    unfit:   "不适合",
+  };
+
+  const listEl = document.getElementById('systemList');
+  let totalMarked = 0;
+
+  systems.forEach((sys) => {
+    const markedStyles = sys.styles.filter(s => s.status);
+    const markedInSys = markedStyles.length;
+    totalMarked += markedInSys;
+
+    const uniqueStatuses = [...new Set(markedStyles.map(s => s.status))];
+    const statusDotsHtml = uniqueStatuses.map(st => `<span class="dot ${st}" title="${STATUS_LABEL[st]}"></span>`).join('');
+
+    const styleRowsHtml = sys.styles.map(s => {
+      const tag = s.href ? 'a' : 'div';
+      const hrefAttr = s.href ? ` href="${s.href}"` : '';
+      const arrow = s.href ? '<span class="row-arrow">→</span>' : '';
+      return `
+      <${tag} class="style-row${s.href ? ' style-row-link' : ''}"${hrefAttr}>
+        <span class="mark">${s.mark}</span>
+        <span class="cn">${s.cn}</span>
+        <span class="en">${s.en}</span>
+        ${s.status ? `<span class="status ${s.status}">${STATUS_LABEL[s.status]}</span>` : ''}
+        ${arrow}
+      </${tag}>`;
+    }).join('');
+
+    const sysEl = document.createElement('div');
+    sysEl.className = 'system';
+    const cnHtml = sys.href
+      ? `<a class="system-cn system-link" href="${sys.href}">${sys.cn} <span class="enter-arrow">→</span></a>`
+      : `<span class="system-cn">${sys.cn}</span>`;
+
+    sysEl.innerHTML = `
+      <div class="system-head">
+        <span class="caret">▶</span>
+        <div class="system-titles">
+          <div class="system-titlerow">
+            <span class="system-no">${sys.no}</span>
+            ${cnHtml}
+          </div>
+          <span class="system-en">${sys.en}</span>
+        </div>
+        <div class="system-mid">
+          <div class="system-mood">${sys.mood}</div>
+          <div class="system-def">${sys.def}</div>
+        </div>
+        <div class="system-meta">
+          <div class="count-row">
+            ${markedInSys > 0 ? `<span class="marked">${markedInSys} 已标记</span>` : ''}
+            <span>${sys.styles.length} 个风格</span>
+          </div>
+          ${statusDotsHtml ? `<div class="status-dots">${statusDotsHtml}</div>` : ''}
+        </div>
+      </div>
+      <div class="system-body">
+        ${styleRowsHtml}
+      </div>
+    `;
+    sysEl.querySelector('.system-head').addEventListener('click', (e) => {
+      if (e.target.closest('.system-link')) return;
+      sysEl.classList.toggle('open');
+    });
+    listEl.appendChild(sysEl);
+  });
+
+  document.getElementById('markedCount').textContent = totalMarked;
+</script>
+
+</body>
+</html>
