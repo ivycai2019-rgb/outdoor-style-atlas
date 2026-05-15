@@ -90,7 +90,7 @@
       <div class="col-cover">
         ${coverHTML}
         ${markLabel ? `<span class="badge-mark ${markClass}">${markLabel}</span>` : ''}
-        ${s.href ? `<label class="col-compare" title="加入对比"><input type="checkbox" data-idx="${idx}"><span class="col-compare-box"></span></label>` : ''}
+        ${s.href ? `<button type="button" class="col-compare-btn" data-idx="${idx}" title="加入对比"><span class="col-compare-text">+ 加入对比</span></button>` : ''}
       </div>
       <div class="col-head">
         ${s.href
@@ -187,8 +187,9 @@
 
   function clearAll() {
     selected.clear();
-    document.querySelectorAll('.col-compare input[type=checkbox]').forEach(cb => {
-      cb.checked = false;
+    document.querySelectorAll('.col-compare-btn').forEach(btn => {
+      btn.classList.remove('on');
+      btn.querySelector('.col-compare-text').textContent = '+ 加入对比';
     });
     document.querySelectorAll('.style-col.compare-on').forEach(c => c.classList.remove('compare-on'));
     updateBar();
@@ -221,21 +222,28 @@
       return { s, col, i };
     });
 
-    // 绑定复选框
-    scrollEl.querySelectorAll('.col-compare input[type=checkbox]').forEach(cb => {
-      cb.addEventListener('change', () => {
-        const idx = +cb.dataset.idx;
-        const card = cb.closest('.style-col');
-        if (cb.checked) {
+    // 绑定"加入对比"按钮
+    scrollEl.querySelectorAll('.col-compare-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const idx = +btn.dataset.idx;
+        const card = btn.closest('.style-col');
+        const textEl = btn.querySelector('.col-compare-text');
+        const isOn = btn.classList.contains('on');
+        if (!isOn) {
           if (selected.size >= MAX_SELECT) {
-            cb.checked = false;
             alert(`最多同时对比 ${MAX_SELECT} 个风格`);
             return;
           }
           selected.add(idx);
+          btn.classList.add('on');
+          textEl.textContent = '已加入 ✓';
           card.classList.add('compare-on');
         } else {
           selected.delete(idx);
+          btn.classList.remove('on');
+          textEl.textContent = '+ 加入对比';
           card.classList.remove('compare-on');
         }
         updateBar();

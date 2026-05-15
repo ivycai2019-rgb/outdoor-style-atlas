@@ -134,43 +134,38 @@ a { color: inherit; text-decoration: none; }
 .style-col .col-cover .badge-mark.core { color: var(--status-core); }
 .style-col .col-cover .badge-mark.supplement { color: var(--ink-mute); }
 
-/* 封面右上角的「加入对比」复选框 */
-.style-col .col-compare {
+/* 封面右上角的「加入对比」按钮 */
+.style-col .col-compare-btn {
   position: absolute;
   top: 10px;
   right: 10px;
-  cursor: pointer;
   z-index: 2;
-}
-.style-col .col-compare input[type=checkbox] {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-.style-col .col-compare-box {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  background: rgba(255,253,247,.92);
+  background: rgba(255,253,247,.95);
   border: 1px solid var(--line);
-  border-radius: 3px;
-  font-size: 14px;
-  color: transparent;
-  transition: background .15s, color .15s, border-color .15s;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1.4;
+  transition: background .15s, color .15s, border-color .15s, box-shadow .15s;
+  backdrop-filter: blur(4px);
 }
-.style-col .col-compare-box::before { content: "✓"; font-weight: 700; }
-.style-col .col-compare:hover .col-compare-box {
+.style-col .col-compare-btn:hover {
   background: var(--bg-card);
   border-color: var(--ink-mute);
-  color: var(--ink-faint);
+  color: var(--ink);
 }
-.style-col .col-compare input:checked ~ .col-compare-box {
+.style-col .col-compare-btn.on {
   background: var(--status-reference);
   border-color: var(--status-reference);
   color: #fff;
+}
+.style-col .col-compare-btn.on:hover {
+  background: var(--status-reference);
+  filter: brightness(0.95);
 }
 .style-col.compare-on { box-shadow: 0 0 0 2px var(--status-reference); }
 

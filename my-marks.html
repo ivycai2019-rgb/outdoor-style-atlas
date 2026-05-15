@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的标记 · Outdoor Style Atlas</title>
+<link rel="stylesheet" href="system-page.css">
+<style>
+  /* 仅本页特有样式 */
+  .hero { border-bottom: 1px solid var(--line); padding-bottom: 28px; margin-bottom: 32px; }
+  .hero .icon { font-size: 32px; margin-bottom: 12px; line-height: 1; }
+  .hero h1 { font-family: "Times New Roman", "Songti SC", serif; font-size: 36px; font-weight: 500; margin: 0 0 4px; letter-spacing: 0.01em; }
+  .hero .en { font-family: "Times New Roman", serif; font-style: italic; font-size: 16px; color: var(--ink-mute); letter-spacing: 0.04em; margin-bottom: 18px; }
+  .hero .lead { color: var(--ink-soft); font-size: 15px; max-width: 720px; }
+
+  /* 个人标记色（区别于 system 的 mark） */
+  :root {
+    --mk-core:      var(--status-core);
+    --mk-favorite:  var(--status-favorite);
+    --mk-reference: var(--status-reference);
+    --mk-pending:   var(--status-pending);
+    --mk-exclude:   var(--status-exclude);
+  }
+
+  /* 汇总条 */
+  .summary {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .sum-cell {
+    flex: 1;
+    min-width: 120px;
+    padding: 18px 20px;
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sum-cell:last-child { border-right: none; }
+  .sum-cell .num {
+    font-family: "Times New Roman", serif;
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+  .sum-cell .lab {
+    font-size: 12.5px;
+    color: var(--ink-mute);
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mk-dot {
+    width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+  }
+  .mk-dot.core      { background: var(--mk-core); }
+  .mk-dot.favorite  { background: var(--mk-favorite); }
+  .mk-dot.reference { background: var(--mk-reference); }
+  .mk-dot.pending   { background: var(--mk-pending); }
+  .mk-dot.exclude   { background: var(--mk-exclude); }
+
+  /* 过滤器 */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+    transition: background .15s, border-color .15s, color .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .filter-btn:hover { background: var(--hover); }
+  .filter-btn.active {
+    background: var(--ink);
+    color: var(--bg-card);
+    border-color: var(--ink);
+  }
+  .filter-btn .cnt {
+    font-family: "Times New Roman", serif;
+    font-size: 12px;
+    color: var(--ink-mute);
+  }
+  .filter-btn.active .cnt { color: var(--bg-card); opacity: .7; }
+
+  /* 分组 */
+  .group { margin-bottom: 48px; }
+  .group-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .group-head .gdot { width: 10px; height: 10px; border-radius: 50%; align-self: center; }
+  .group-head h2 {
+    font-family: "Times New Roman", "Songti SC", serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin: 0;
+    letter-spacing: 0.02em;
+  }
+  .group-head .gcount {
+    font-family: "Times New Roman", serif;
+    font-size: 13px;
+    color: var(--ink-mute);
+  }
+  .group-head .gdesc {
+    font-size: 13px;
+    color: var(--ink-mute);
+    margin-left: auto;
+  }
+
+  /* 网格（沿用 system 的 .style-grid） */
+  .marks-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  @media (max-width: 1100px) { .marks-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 720px)  { .marks-grid { grid-template-columns: 1fr; } }
+
+  /* 卡片左上角的"个人标记"小徽章（覆盖在封面上） */
+  .style-col .my-mark-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    padding: 3px 8px 3px 18px;
+    background: rgba(255,253,247,.95);
+    color: var(--ink);
+    border-radius: 2px;
+    z-index: 2;
+  }
+  .style-col .my-mark-badge::before {
+    content: "";
+    position: absolute;
+    left: 7px; top: 50%;
+    transform: translateY(-50%);
+    width: 7px; height: 7px;
+    border-radius: 50%;
+  }
+  .style-col .my-mark-badge.core::before      { background: var(--mk-core); }
+  .style-col .my-mark-badge.favorite::before  { background: var(--mk-favorite); }
+  .style-col .my-mark-badge.reference::before { background: var(--mk-reference); }
+  .style-col .my-mark-badge.pending::before   { background: var(--mk-pending); }
+  .style-col .my-mark-badge.exclude::before   { background: var(--mk-exclude); }
+
+  /* 卡片头部加入"所属体系"行 */
+  .style-col .col-system {
+    font-size: 11.5px;
+    color: var(--ink-mute);
+    letter-spacing: 0.06em;
+    margin-top: 6px;
+  }
+
+  /* 空状态 */
+  .empty {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--ink-mute);
+    background: var(--bg-card);
+    border: 1px dashed var(--line);
+    border-radius: 4px;
+  }
+  .empty .em-icon { font-size: 40px; margin-bottom: 12px; line-height: 1; }
+  .empty p { margin: 6px 0; }
+  .empty .em-tip { font-size: 13px; color: var(--ink-faint); margin-top: 12px; }
+  .empty a {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 10px 22px;
+    background: var(--ink);
+    color: var(--bg-card);
+    border-radius: 2px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+  .empty a:hover { background: var(--ink-soft); }
+
+  /* 工具栏 */
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line-soft);
+    color: var(--ink-mute);
+    font-size: 13px;
+  }
+  .toolbar .tb-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 6px 14px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .toolbar .tb-btn:hover { background: var(--hover); }
+  .toolbar .tb-btn.danger:hover {
+    color: var(--status-core);
+    border-color: var(--status-core);
+  }
+  .toolbar .spacer { flex: 1; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="crumb">
+    <a href="index.html">首页</a>
+    <span class="sep">/</span>
+    <span class="current">我的标记</span>
+  </div>
+
+  <section class="hero">
+    <div class="icon">★</div>
+    <h1>我的标记</h1>
+    <div class="en">My Marks</div>
+    <p class="lead">
+      汇集所有已标记的风格——核心 / 偏好 / 借鉴 / 待定 / 排除。
+      数据存储在当前浏览器本地（localStorage），不会上传也不跨设备同步。
+    </p>
+  </section>
+
+  <div class="summary" id="summary"></div>
+  <div class="filter-bar" id="filterBar"></div>
+  <div id="markList"></div>
+
+  <div class="toolbar" id="toolbar" hidden>
+    <button class="tb-btn" id="btnExport">导出 JSON</button>
+    <button class="tb-btn" id="btnCopy">复制为文本</button>
+    <span class="spacer"></span>
+    <button class="tb-btn danger" id="btnClear">清空全部标记</button>
+  </div>
+
+  <nav class="foot-nav">
+    <a href="index.html">← 返回首页</a>
+    <span>我的标记 · OUTDOOR STYLE ATLAS</span>
+  </nav>
+
+</div>
+
+<script src="styles-meta.js"></script>
+<script>
+(function () {
+  const PREFIX = "styleMark:";
+  const FEATURE_KEYS = ['空间结构', '动线 / 视线', '植物语言', '色彩系统', '材料系统'];
+
+  const MARK_TYPES = [
+    { key: "core",      label: "核心", desc: "强烈认同 · 想拥有的方向" },
+    { key: "favorite",  label: "偏好", desc: "审美喜欢" },
+    { key: "reference", label: "借鉴", desc: "局部可参考" },
+    { key: "pending",   label: "待定", desc: "再看看" },
+    { key: "exclude",   label: "排除", desc: "明确不要" },
+  ];
+
+  // styles-meta.js 提供的全量风格元数据（cover/cn/en/href/def/detail/systemCn …）
+  const META_BY_HREF = {};
+  (window.STYLES_META || []).forEach(s => { META_BY_HREF[s.href] = s; });
+
+  function readAllMarks() {
+    const marks = [];
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k || !k.startsWith(PREFIX)) continue;
+        const href = k.slice(PREFIX.length);
+        const type = localStorage.getItem(k);
+        if (!type || !MARK_TYPES.find(t => t.key === type)) continue;
+        const meta = META_BY_HREF[href];
+        if (meta) {
+          marks.push({ type, ...meta });
+        } else {
+          // 元数据里找不到（页面未在 system 列表内）也兜底显示
+          marks.push({
+            type, href,
+            cn: href.replace(/^style-/, '').replace(/\.html$/, ''),
+            en: '', cover: null, def: null, detail: null,
+            systemCn: '—', systemEn: '',
+          });
+        }
+      }
+    } catch (e) { console.warn(e); }
+    return marks;
+  }
+
+  let allMarks = readAllMarks();
+  let currentFilter = "all";
+
+  /* ========== 汇总条 ========== */
+  function renderSummary() {
+    const el = document.getElementById("summary");
+    const cells = [`<div class="sum-cell"><div class="num">${allMarks.length}</div><div class="lab">总标记</div></div>`];
+    MARK_TYPES.forEach(t => {
+      const n = allMarks.filter(m => m.type === t.key).length;
+      cells.push(`<div class="sum-cell"><div class="num">${n}</div><div class="lab"><span class="mk-dot ${t.key}"></span>${t.label}</div></div>`);
+    });
+    el.innerHTML = cells.join("");
+  }
+
+  /* ========== 过滤器 ========== */
+  function renderFilters() {
+    const bar = document.getElementById("filterBar");
+    const buttons = [{ key: "all", label: "全部", count: allMarks.length }]
+      .concat(MARK_TYPES.map(t => ({
+        key: t.key,
+        label: t.label,
+        count: allMarks.filter(m => m.type === t.key).length,
+      })));
+    bar.innerHTML = buttons.map(b => `
+      <button class="filter-btn ${b.key === currentFilter ? 'active' : ''}" data-filter="${b.key}">
+        ${b.key !== 'all' ? `<span class="mk-dot ${b.key}"></span>` : ''}
+        <span>${b.label}</span>
+        <span class="cnt">${b.count}</span>
+      </button>`).join("");
+    bar.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        currentFilter = btn.dataset.filter;
+        renderFilters();
+        renderList();
+      });
+    });
+  }
+
+  /* ========== 卡片（沿用 system-page.css 的 .style-col） ========== */
+  function buildCard(m) {
+    const type = MARK_TYPES.find(t => t.key === m.type);
+    const coverHTML = m.cover
+      ? `<img src="${m.cover}" alt="${m.cn}" loading="lazy">`
+      : `<div class="placeholder-cover">${m.cn} · 印象图</div>`;
+
+    const col = document.createElement('article');
+    col.className = 'style-col';
+    col.dataset.href = m.href;
+
+    col.innerHTML = `
+      <div class="col-cover">
+        ${coverHTML}
+        <span class="my-mark-badge ${m.type}">${type.label}</span>
+      </div>
+      <div class="col-head">
+        <a class="col-head-link" href="${m.href}" title="查看详情">
+          <div class="col-title">
+            <span class="col-cn">${m.cn}</span>
+            <span class="col-arrow">→</span>
+          </div>
+          <div class="col-en">${m.en || ''}</div>
+          <div class="col-system">${m.systemCn || ''}</div>
+        </a>
+      </div>
+      <div class="col-section col-mood">
+        <div class="col-section-label">核心气质</div>
+        <div class="col-section-body" data-slot="核心气质">${
+          (m.detail && m.detail['核心气质']) || m.def || '加载中…'
+        }</div>
+      </div>
+      <div class="col-section col-recog">
+        <div class="col-section-label">风格识别点 / How to Recognize</div>
+        <ol class="col-recog-list" data-slot="识别点列表">${
+          (m.detail && m.detail['识别点列表'])
+            ? m.detail['识别点列表'].map(x => `<li>${x}</li>`).join('')
+            : '<li class="loading">加载中…</li>'
+        }</ol>
+      </div>
+      <div class="col-section col-feat">
+        <div class="col-section-label">核心特征 / Core Features</div>
+        <dl class="col-feat-list">
+          ${FEATURE_KEYS.map(k => `
+            <dt>${k}</dt>
+            <dd data-slot="${k}">${
+              (m.detail && m.detail[k]) ? truncate(m.detail[k]) : '加载中…'
+            }</dd>
+          `).join('')}
+        </dl>
+      </div>
+    `;
+    return col;
+  }
+
+  function truncate(s) {
+    if (typeof s !== 'string') return '—';
+    return s.length > 240 ? s.slice(0, 240) + '…' : s;
+  }
+
+  /* ========== 异步抓取详情（fallback） ========== */
+  async function fillFromFetch(card, href) {
+    try {
+      const html = await fetch(href).then(r => r.text());
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+
+      // 核心气质
+      let moodHTML = '';
+      doc.querySelectorAll('.intro .kp').forEach(kp => {
+        const lab = (kp.querySelector('.kp-label') || {}).textContent || '';
+        if (lab.trim() === '核心气质') {
+          moodHTML = (kp.querySelector('.kp-text') || {}).innerHTML || '';
+        }
+      });
+      const moodEl = card.querySelector('[data-slot="核心气质"]');
+      if (moodEl && moodHTML) moodEl.innerHTML = moodHTML.trim();
+      else if (moodEl && moodEl.textContent.trim() === '加载中…') moodEl.textContent = '—';
+
+      // 核心特征
+      const feats = {};
+      doc.querySelectorAll('.features .feat-row').forEach(r => {
+        const k = ((r.querySelector('.feat-key') || {}).textContent || '').trim();
+        const valEl = r.querySelector('.feat-val');
+        if (!k || !valEl) return;
+        const plantLines = valEl.querySelectorAll('.plant-line');
+        if (plantLines.length > 0) {
+          feats[k] = Array.from(plantLines).map(pl => {
+            const lab = (pl.querySelector('b') || {}).textContent || '';
+            const span = (pl.querySelector('span') || {}).innerHTML || '';
+            return `<b>${lab}</b>:${span}`;
+          }).join('<br>');
+        } else {
+          feats[k] = valEl.innerHTML.trim();
+        }
+      });
+      FEATURE_KEYS.forEach(k => {
+        const el = card.querySelector(`[data-slot="${CSS.escape(k)}"]`);
+        if (!el) return;
+        if (feats[k]) el.innerHTML = truncate(feats[k]);
+        else if (el.textContent.trim() === '加载中…') el.textContent = '—';
+      });
+
+      // 识别点
+      const recogs = Array.from(doc.querySelectorAll('.recognize .recognize-text'))
+        .map(r => r.innerHTML.trim());
+      const recogEl = card.querySelector('[data-slot="识别点列表"]');
+      if (recogEl && recogs.length) {
+        recogEl.innerHTML = recogs.map(x => `<li>${x}</li>`).join('');
+      } else if (recogEl && recogEl.querySelector('.loading')) {
+        recogEl.innerHTML = '<li>—</li>';
+      }
+    } catch (e) {
+      card.querySelectorAll('[data-slot]').forEach(el => {
+        if (el.textContent.trim() === '加载中…') {
+          el.innerHTML = '<span style="color:var(--status-pending);font-size:12px;">需要 http 服务访问</span>';
+        }
+      });
+    }
+  }
+
+  /* ========== 渲染列表 ========== */
+  function renderList() {
+    const wrap = document.getElementById("markList");
+    const toolbar = document.getElementById("toolbar");
+
+    if (allMarks.length === 0) {
+      toolbar.hidden = true;
+      wrap.innerHTML = `
+        <div class="empty">
+          <div class="em-icon">○</div>
+          <p>还没有任何标记</p>
+          <p class="em-tip">打开任意风格页面，在顶部"个人标记"面板选择 核心 / 偏好 / 借鉴 / 待定 / 排除 即可。</p>
+          <a href="index.html">回到首页浏览风格 →</a>
+        </div>`;
+      return;
+    }
+    toolbar.hidden = false;
+
+    const visibleTypes = currentFilter === "all"
+      ? MARK_TYPES.map(t => t.key)
+      : [currentFilter];
+
+    wrap.innerHTML = '';
+    let anyShown = false;
+    const lazyTasks = [];
+
+    visibleTypes.forEach(typeKey => {
+      const items = allMarks
+        .filter(m => m.type === typeKey)
+        .sort((a, b) => a.cn.localeCompare(b.cn, "zh-Hans-CN"));
+      if (items.length === 0) return;
+      anyShown = true;
+      const type = MARK_TYPES.find(t => t.key === typeKey);
+
+      const section = document.createElement('section');
+      section.className = 'group';
+      section.innerHTML = `
+        <div class="group-head">
+          <span class="gdot mk-dot ${type.key}"></span>
+          <h2>${type.label}</h2>
+          <span class="gcount">${items.length}</span>
+          <span class="gdesc">${type.desc}</span>
+        </div>
+        <div class="marks-grid"></div>`;
+      const grid = section.querySelector('.marks-grid');
+      items.forEach(m => {
+        const card = buildCard(m);
+        grid.appendChild(card);
+        // 如果 detail 不完整（缺核心气质或识别点），异步拉
+        if (!m.detail || !m.detail['核心气质'] || !m.detail['识别点列表']) {
+          lazyTasks.push(fillFromFetch(card, m.href));
+        }
+      });
+      wrap.appendChild(section);
+    });
+
+    if (!anyShown) {
+      wrap.innerHTML = `<div class="empty"><div class="em-icon">○</div><p>这个分类下还没有标记</p></div>`;
+    }
+
+    // 并行执行异步抓取
+    Promise.all(lazyTasks);
+  }
+
+  /* ========== 工具栏 ========== */
+  document.getElementById("btnExport").addEventListener("click", () => {
+    const data = {
+      exportedAt: new Date().toISOString(),
+      total: allMarks.length,
+      marks: allMarks.map(m => ({ type: m.type, cn: m.cn, en: m.en, href: m.href, system: m.systemCn })),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `outdoor-style-marks-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+
+  document.getElementById("btnCopy").addEventListener("click", async () => {
+    const lines = [];
+    MARK_TYPES.forEach(t => {
+      const items = allMarks.filter(m => m.type === t.key);
+      if (items.length === 0) return;
+      lines.push(`【${t.label}】(${items.length})`);
+      items.sort((a, b) => a.cn.localeCompare(b.cn, "zh-Hans-CN"))
+        .forEach(m => lines.push(`  · ${m.cn} ${m.en}（${m.systemCn}）`));
+      lines.push("");
+    });
+    const text = lines.join("\n").trim();
+    try {
+      await navigator.clipboard.writeText(text);
+      const btn = document.getElementById("btnCopy");
+      const old = btn.textContent;
+      btn.textContent = "已复制 ✓";
+      setTimeout(() => { btn.textContent = old; }, 1500);
+    } catch (e) {
+      alert("复制失败，请手动选择文本：\n\n" + text);
+    }
+  });
+
+  document.getElementById("btnClear").addEventListener("click", () => {
+    if (!confirm(`确定清空全部 ${allMarks.length} 个标记吗？此操作无法撤销。`)) return;
+    try {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(PREFIX)) keys.push(k);
+      }
+      keys.forEach(k => localStorage.removeItem(k));
+    } catch (e) { alert("清空失败：" + e.message); return; }
+    allMarks = readAllMarks();
+    currentFilter = "all";
+    renderSummary();
+    renderFilters();
+    renderList();
+  });
+
+  renderSummary();
+  renderFilters();
+  renderList();
+})();
+</script>
+
+</body>
+</html>

@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>风格对比 · Outdoor Style Atlas</title>
+<link rel="stylesheet" href="system-page.css">
 <style>
   :root {
     --bg: #faf8f3;
@@ -88,6 +89,48 @@
     line-height: 1.8;
   }
   .empty-state b { color: var(--ink); }
+
+  /* 表格上方的卡片预览（沿用 system-page.css 的 .style-col） */
+  .preview-section { margin-bottom: 32px; }
+  .preview-label {
+    font-family: "Times New Roman", serif;
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr));
+    gap: 16px;
+  }
+  @media (max-width: 1100px) {
+    .preview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 720px) {
+    .preview-grid { grid-template-columns: 1fr; }
+  }
+
+  .section-title {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin: 0 0 18px;
+  }
+  .section-title .idx {
+    font-family: "Times New Roman", serif;
+    font-size: 12px;
+    color: var(--ink-mute);
+    letter-spacing: 0.18em;
+  }
+  .section-title h2 {
+    font-family: "Times New Roman", "Songti SC", serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin: 0;
+    letter-spacing: 0.02em;
+  }
 
   .table-wrap {
     overflow-x: auto;
@@ -290,6 +333,44 @@
     }
   }
 
+  function buildPreviewCard(s, d) {
+    const markClass = MARK_LABEL[s.mark] || 'edge';
+    const markLabel = ({ core: '核心风格', supplement: '补充风格', edge: '边缘风格' })[markClass] || '';
+    const coverHTML = s.cover
+      ? `<img src="${s.cover}" alt="${s.cn}" loading="lazy">`
+      : `<div class="placeholder-cover">${s.cn} · 印象图</div>`;
+    const recogList = (d['识别点列表'] || []).slice(0, 5);
+    return `
+      <article class="style-col">
+        <div class="col-cover">
+          ${coverHTML}
+          ${markLabel ? `<span class="badge-mark ${markClass}">${markLabel}</span>` : ''}
+        </div>
+        <div class="col-head">
+          ${s.href ? `<a class="col-head-link" href="${s.href}">
+            <div class="col-title">
+              <span class="col-cn">${s.cn}</span>
+              <span class="col-arrow">→</span>
+            </div>
+            <div class="col-en">${s.en || ''}</div>
+          </a>` : `
+            <div class="col-title"><span class="col-cn">${s.cn}</span></div>
+            <div class="col-en">${s.en || ''}</div>
+          `}
+        </div>
+        <div class="col-section col-mood">
+          <div class="col-section-label">核心气质</div>
+          <div class="col-section-body">${d['核心气质'] || '—'}</div>
+        </div>
+        <div class="col-section col-recog">
+          <div class="col-section-label">风格识别点 / How to Recognize</div>
+          <ol class="col-recog-list">${
+            recogList.length === 0 ? '<li>—</li>' : recogList.map(x => `<li>${x}</li>`).join('')
+          }</ol>
+        </div>
+      </article>`;
+  }
+
   async function render() {
     contentEl.innerHTML = '<div class="empty-state">加载中…</div>';
     const datas = await Promise.all(payload.map(ensureDetail));
@@ -297,7 +378,16 @@
     const n = payload.length;
     const colTpl = `160px repeat(${n}, minmax(220px, 1fr))`;
 
-    let html = '<div class="table-wrap"><div class="ct">';
+    // ===== 表格上方的卡片预览 =====
+    let html = '<section class="preview-section">';
+    html += `<div class="section-title"><span class="idx">— 01</span><h2>风格概览 / Overview</h2></div>`;
+    html += `<div class="preview-grid" style="--n:${n}">`;
+    payload.forEach((s, i) => html += buildPreviewCard(s, datas[i] || {}));
+    html += '</div></section>';
+
+    html += `<div class="section-title"><span class="idx">— 02</span><h2>逐项对比 / Side-by-Side</h2></div>`;
+
+    html += '<div class="table-wrap"><div class="ct">';
 
     // 表头
     html += `<div class="ct-row head" style="grid-template-columns:${colTpl}">`;

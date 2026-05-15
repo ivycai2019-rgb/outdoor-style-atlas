@@ -423,11 +423,11 @@
         <span>◇</span>
         <span>判断框架</span>
       </a>
-      <button class="pill">
+      <a class="pill pill-link" href="my-marks.html">
         <span>★</span>
-        <span>收藏 · 待定</span>
+        <span>我的标记</span>
         <span class="count" id="markedCount">0</span>
-      </button>
+      </a>
     </div>
   </header>
 
@@ -661,12 +661,10 @@
   };
 
   const listEl = document.getElementById('systemList');
-  let totalMarked = 0;
 
   systems.forEach((sys) => {
     const markedStyles = sys.styles.filter(s => s.status);
     const markedInSys = markedStyles.length;
-    totalMarked += markedInSys;
 
     const uniqueStatuses = [...new Set(markedStyles.map(s => s.status))];
     const statusDotsHtml = uniqueStatuses.map(st => `<span class="dot ${st}" title="${STATUS_LABEL[st]}"></span>`).join('');
@@ -724,7 +722,17 @@
     listEl.appendChild(sysEl);
   });
 
-  document.getElementById('markedCount').textContent = totalMarked;
+  // 从 localStorage 统计真实标记数（key 格式：styleMark:<filename.html>）
+  (function updateMarkedCount() {
+    let n = 0;
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('styleMark:') && localStorage.getItem(k)) n++;
+      }
+    } catch (e) { /* ignore */ }
+    document.getElementById('markedCount').textContent = n;
+  })();
 </script>
 
 </body>
