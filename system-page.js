@@ -10,6 +10,16 @@
 
   const FEATURE_KEYS = ['空间结构', '动线 / 视线', '植物语言', '色彩系统', '材料系统'];
 
+  // 个人标记选项（与风格详情页的 style-page.js 共用 localStorage key: styleMark:<href>）
+  const PERSONAL_MARKS = [
+    { key: 'core',      label: '核心' },
+    { key: 'favorite',  label: '偏好' },
+    { key: 'reference', label: '借鉴' },
+    { key: 'pending',   label: '待定' },
+    { key: 'exclude',   label: '排除' },
+  ];
+  const MARK_STORE_PREFIX = 'styleMark:';
+
   // 稳定排序:★ → ◎ → △
   const rawStyles = window.SYSTEM_STYLES || [];
   const styles = rawStyles.map((s, i) => ({ ...s, _origIdx: i }))
@@ -105,6 +115,15 @@
              <div class="col-en">${s.en}</div>`
         }
       </div>
+      ${s.href ? `
+      <div class="col-section col-mymark">
+        <div class="col-section-label">个人标记 / My Mark</div>
+        <div class="col-mymark-row" data-href="${s.href}">
+          ${PERSONAL_MARKS.map(m => `
+            <button type="button" class="col-mark-btn" data-mark="${m.key}">${m.label}</button>
+          `).join('')}
+        </div>
+      </div>` : ''}
       <div class="col-section col-mood">
         <div class="col-section-label">核心气质</div>
         <div class="col-section-body" data-slot="核心气质">${s.href ? '加载中…' : (s.def || '—')}</div>
@@ -124,6 +143,63 @@
       </div>
     `;
     return col;
+  }
+
+  // 同步卡片上的个人标记按钮状态（从 localStorage 读取）
+  function syncMarkButtons(rowEl) {
+    const href = rowEl.dataset.href;
+    let saved = null;
+    try { saved = localStorage.getItem(MARK_STORE_PREFIX + href); } catch (e) {}
+    rowEl.querySelectorAll('.col-mark-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.mark === saved);
+    });
+  }
+
+  // 刷新体系页顶部的 MARKED 单元（X / Y 已标记 + 各类小色点）
+  function refreshMarkedCell() {
+    const cell = document.getElementById('markedCell');
+    if (!cell) return;
+    const total = styles.filter(s => s.href).length;
+    const counts = { core: 0, favorite: 0, reference: 0, pending: 0, exclude: 0 };
+    let marked = 0;
+    styles.forEach(s => {
+      if (!s.href) return;
+      let v = null;
+      try { v = localStorage.getItem(MARK_STORE_PREFIX + s.href); } catch (e) {}
+      if (v && counts.hasOwnProperty(v)) { counts[v]++; marked++; }
+    });
+    if (marked === 0) {
+      cell.textContent = '未标记';
+      return;
+    }
+    const dots = PERSONAL_MARKS
+      .filter(m => counts[m.key] > 0)
+      .map(m => `<span class="marked-dot ${m.key}" title="${m.label} ${counts[m.key]}">${counts[m.key]}</span>`)
+      .join('');
+    cell.innerHTML = `<span class="marked-summary">${marked} / ${total} 已标记</span><span class="marked-dots">${dots}</span>`;
+  }
+
+  // 给卡片上的个人标记按钮绑定点击
+  function bindMarkButtons(rowEl) {
+    const href = rowEl.dataset.href;
+    rowEl.querySelectorAll('.col-mark-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const mark = btn.dataset.mark;
+        const isActive = btn.classList.contains('active');
+        try {
+          if (isActive) {
+            localStorage.removeItem(MARK_STORE_PREFIX + href);
+          } else {
+            localStorage.setItem(MARK_STORE_PREFIX + href, mark);
+          }
+        } catch (e) {}
+        syncMarkButtons(rowEl);
+        refreshMarkedCell();
+      });
+    });
+    syncMarkButtons(rowEl);
   }
 
   function fillColumn(colEl, data) {
@@ -220,6 +296,18 @@
       const col = buildColumn(s, i);
       scrollEl.appendChild(col);
       return { s, col, i };
+    });
+
+    // 绑定个人标记按钮
+    scrollEl.querySelectorAll('.col-mymark-row').forEach(bindMarkButtons);
+    refreshMarkedCell();
+
+    // 页面回到前台时刷新一次（用户可能在详情页改过标记）
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        scrollEl.querySelectorAll('.col-mymark-row').forEach(syncMarkButtons);
+        refreshMarkedCell();
+      }
     });
 
     // 绑定"加入对比"按钮
