@@ -232,19 +232,15 @@
 
   .system-head {
     display: grid;
-    grid-template-columns: 24px auto 1fr auto;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    padding: 12px 22px;
+    padding: 14px 22px;
     gap: 2px 16px;
-    cursor: pointer;
   }
-  .caret {
-    color: var(--ink-mute);
-    font-size: 11px;
-    transition: transform .2s;
-    padding-top: 0;
-  }
-  .system.open .caret { transform: rotate(90deg); }
+  .system-clickable { cursor: pointer; transition: background .12s, border-color .15s; }
+  .system-clickable:hover { background: var(--hover); border-color: var(--ink-mute); }
+  .system-clickable:hover .system-cn { color: var(--accent); }
+  .system-clickable:hover .enter-arrow { color: var(--accent); transform: translateX(3px); }
 
   .system-titles {
     display: flex;
@@ -322,74 +318,16 @@
   .dot.partial { background: var(--status-partial); }
   .dot.unfit   { background: var(--status-unfit); }
 
-  /* ===== 体系展开内容 ===== */
-  .system-body {
-    display: none;
-    padding: 8px 28px 24px 60px;
-    border-top: 1px dashed var(--line);
-    background: linear-gradient(to bottom, rgba(237,232,216,.18), transparent 80px);
-  }
-  .system.open .system-body { display: block; }
-  .style-row {
-    display: flex;
-    align-items: center;
-    padding: 11px 0;
-    gap: 14px;
-    color: var(--ink-soft);
-    font-size: 14px;
-    border-bottom: 1px dashed var(--line-soft);
-  }
-  .style-row:last-child { border-bottom: none; }
-  a.style-row { text-decoration: none; color: var(--ink-soft); transition: background .12s, color .12s; }
-  a.style-row:hover { background: var(--hover); color: var(--ink); }
-  a.style-row:hover .cn { color: var(--accent); }
-  .row-arrow {
-    color: var(--ink-faint);
-    font-family: "Times New Roman", serif;
-    font-size: 14px;
-    margin-left: auto;
-    transition: transform .15s, color .15s;
-  }
-  a.style-row:hover .row-arrow { color: var(--accent); transform: translateX(3px); }
-  .style-row .mark {
-    width: 16px;
-    color: var(--ink-mute);
-    font-size: 12px;
-    flex-shrink: 0;
-    text-align: center;
-  }
-  .style-row .cn { color: var(--ink); min-width: 140px; }
-  .style-row .en {
-    color: var(--ink-mute);
-    font-size: 13px;
-    flex: 1;
-    font-family: "Times New Roman", serif;
-    font-style: italic;
-    letter-spacing: 0.03em;
-  }
-  .style-row .status {
-    font-size: 12px;
-    padding: 2px 8px;
-    border-radius: 3px;
-    letter-spacing: 0.04em;
-  }
-  .style-row .status.saved   { color: var(--status-saved);   background: rgba(107,142,78,.10); }
-  .style-row .status.pending { color: var(--status-pending); background: rgba(193,154,46,.10); }
-  .style-row .status.partial { color: var(--status-partial); background: rgba(91,122,138,.10); }
-  .style-row .status.unfit   { color: var(--status-unfit);   background: rgba(168,90,74,.10); }
-
   /* ===== 响应式 ===== */
   @media (max-width: 980px) {
     .wrap { padding: 40px 24px 64px; }
     .header { flex-direction: column; }
     .title h1 { font-size: 30px; }
     .system-head {
-      grid-template-columns: 24px 1fr;
-      gap: 4px 14px;
+      grid-template-columns: 1fr;
+      gap: 6px 14px;
     }
-    .system-mid { grid-column: 2; }
     .system-meta {
-      grid-column: 2;
       align-items: flex-start;
       flex-direction: row;
       flex-wrap: wrap;
@@ -397,7 +335,6 @@
     }
     .system-en { display: none; }
     .legend { flex-wrap: wrap; gap: 12px 20px; }
-    .system-body { padding-left: 28px; }
   }
 </style>
 </head>
@@ -490,7 +427,7 @@
     <span>◎ 补充</span>
     <span>△ 边缘</span>
     <span class="gap"></span>
-    <span class="hint">点击体系标题展开 / 收起</span>
+    <span class="hint">点击体系进入详情</span>
   </div>
 
   <!-- 体系列表 -->
@@ -691,7 +628,6 @@
 
     sysEl.innerHTML = `
       <div class="system-head">
-        <span class="caret">▶</span>
         <div class="system-titles">
           <div class="system-titlerow">
             <span class="system-no">${sys.no}</span>
@@ -711,14 +647,15 @@
           ${statusDotsHtml ? `<div class="status-dots">${statusDotsHtml}</div>` : ''}
         </div>
       </div>
-      <div class="system-body">
-        ${styleRowsHtml}
-      </div>
     `;
-    sysEl.querySelector('.system-head').addEventListener('click', (e) => {
-      if (e.target.closest('.system-link')) return;
-      sysEl.classList.toggle('open');
-    });
+    // 整行作为进入体系页的链接（如果有 href）
+    if (sys.href) {
+      sysEl.classList.add('system-clickable');
+      sysEl.addEventListener('click', (e) => {
+        if (e.target.closest('a')) return;
+        location.href = sys.href;
+      });
+    }
     listEl.appendChild(sysEl);
   });
 
